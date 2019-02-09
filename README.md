@@ -1,13 +1,7 @@
 # react-use-database
 
-> query param hooks
+> relational data at its simplest
 
-An opinionated, batteries-included hook to sync query parameters with React state.
-Works very similarly to useState except when you 'setState' your parameters will propagate to the URL
-as query parameters. Alternatively, if you change the url, the state will update with the new query parameter values.
-And the best part is you don't have to worry about coercing types! All of the coercion happens
-under the hood. I've found one of the most annoying parts of working with query-string is that
-even after parsing the url, everything is still a string!
 
 [![NPM](https://img.shields.io/npm/v/react-use-database.svg)](https://www.npmjs.com/package/react-use-database) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
