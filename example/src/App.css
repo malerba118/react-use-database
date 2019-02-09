@@ -1,0 +1,29 @@
+.controls {
+  display: flex;
+  justify-content: center;
+}
+
+.dropdown {
+  margin: 16px !important;
+  padding: 8px;
+  width: 115px !important;
+}
+
+.params-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.param-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.param-container button {
+  width: 240px;
+  margin: 8px;
+  text-transform: none;
+  font-size: 12px;
+}

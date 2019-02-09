@@ -1,0 +1,38 @@
+import React, { useEffect } from "react";
+import ReactDOM from "react-dom";
+import useAsync from "./useAsync";
+import { useDB, useNormalizedApi } from "./db";
+
+function App() {
+  const db = useDB();
+  const normalizedApi = useNormalizedApi();
+  let [getPostsRequest, getPosts] = useAsync(normalizedApi.getPosts);
+
+  let posts = db.executeQuery("postsByIds", getPostsRequest.result || []);
+
+  useEffect(() => {
+    getPosts();
+  }, []);
+
+  return (
+    <div className="App">
+      <h1>Posts</h1>
+      {getPostsRequest.pending && <div>loading...</div>}
+      {posts.map(p => (
+        <div key={p.id}>
+          <span>{p.title}</span>
+          {!p.liked && (
+            <button onClick={() => normalizedApi.likePost(p.id)}>like</button>
+          )}
+          {p.liked && (
+            <button onClick={() => normalizedApi.unlikePost(p.id)}>
+              unlike
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default App
