@@ -3183,6 +3183,20 @@ const createGlobalState = (initialState) => {
   };
 };
 
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
 var slicedToArray = function () {
   function sliceIterator(arr, i) {
     var _arr = [];
@@ -3224,8 +3238,7 @@ var slicedToArray = function () {
 var createDB = function createDB(schemas, queryDefinitions) {
   var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
       defaultValues = _ref.defaultValues,
-      _ref$subscribe = _ref.subscribe,
-      subscribe = _ref$subscribe === undefined ? function () {} : _ref$subscribe;
+      subscribe = _ref.subscribe;
 
   schemas = Object.values(schemas);
 
@@ -3233,14 +3246,11 @@ var createDB = function createDB(schemas, queryDefinitions) {
   schemas.forEach(function (schema) {
     defaults$$1[schema.key] = {};
   });
+  defaults$$1 = _extends({}, defaults$$1, defaultValues);
 
-  var initialState = { db: defaults$$1 };
-
-  var _createGlobalState = createGlobalState(initialState),
+  var _createGlobalState = createGlobalState({ db: defaults$$1 }),
       GlobalStateProvider = _createGlobalState.GlobalStateProvider,
       useGlobalState = _createGlobalState.useGlobalState;
-
-  defaults$$1 = Object.assign({}, defaults$$1, defaultValues);
 
   var useDB = function useDB() {
     var _useGlobalState = useGlobalState("db"),
@@ -3249,10 +3259,16 @@ var createDB = function createDB(schemas, queryDefinitions) {
         setEntities = _useGlobalState2[1];
 
     return {
-      mergeEntities: function mergeEntities(nextEntities) {
+      mergeEntities: function mergeEntities(nextEntities, customizer) {
         setEntities(function (prevEntities) {
-          var nextState = cloneDeep_1(mergeWith_1(prevEntities, nextEntities));
-          subscribe(cloneDeep_1(nextState));
+          var nextState = mergeWith_1({}, prevEntities, nextEntities, customizer || function (objValue, srcValue) {
+            if (isArray_1(objValue) || isArray_1(srcValue) || isSet_1(objValue) || isSet_1(srcValue)) {
+              return srcValue;
+            }
+          });
+          if (typeof subscribe === 'function') {
+            subscribe(cloneDeep_1(nextState));
+          }
           return nextState;
         });
       },

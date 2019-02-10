@@ -2,12 +2,17 @@ import React, { useEffect } from "react";
 import { denormalize, schema, normalize } from "normalizr";
 import mergeWith from "lodash/mergeWith";
 import cloneDeep from "lodash/cloneDeep";
+import isArray from "lodash/isArray";
+import isSet from "lodash/isSet";
 import { createGlobalState } from "react-hooks-global-state";
 
 const createDB = (
   schemas,
   queryDefinitions,
-  { defaultValues, subscribe = () => {} } = {}
+  {
+    defaultValues,
+    subscribe
+  } = {}
 ) => {
   schemas = Object.values(schemas);
 
@@ -19,22 +24,29 @@ const createDB = (
   schemas.forEach(schema => {
     defaults[schema.key] = {};
   });
-
-  const initialState = { db: defaults };
-  const { GlobalStateProvider, useGlobalState } = createGlobalState(
-    initialState
-  );
-
   defaults = { ...defaults, ...defaultValues };
+
+  const { GlobalStateProvider, useGlobalState } = createGlobalState({ db: defaults });
 
   const useDB = () => {
     let [entities, setEntities] = useGlobalState("db");
 
     return {
-      mergeEntities: nextEntities => {
+      mergeEntities: (nextEntities, customizer) => {
         setEntities(prevEntities => {
-          let nextState = cloneDeep(mergeWith(prevEntities, nextEntities));
-          subscribe(cloneDeep(nextState));
+          let nextState = mergeWith(
+            {},
+            prevEntities,
+            nextEntities,
+            customizer || ((objValue, srcValue) => {
+              if (isArray(objValue) || isArray(srcValue) || isSet(objValue) || isSet(srcValue)) {
+                return srcValue
+              }
+            })
+          )
+          if ((typeof subscribe) === 'function') {
+            subscribe(cloneDeep(nextState));
+          }
           return nextState;
         });
       },
