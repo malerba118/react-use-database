@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import useAsync from "./useAsync";
 import { useDB, useNormalizedApi } from "./db";
@@ -13,6 +13,11 @@ function App() {
   useEffect(() => {
     getPosts();
   }, []);
+
+  useEffect(() => {
+    console.log(db.entities)
+  }, [db.entities])
+
 
   return (
     <div className="App">

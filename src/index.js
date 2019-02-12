@@ -11,7 +11,6 @@ const createDB = (
   queryDefinitions,
   {
     defaultValues,
-    subscribe
   } = {}
 ) => {
   schemas = Object.values(schemas);
@@ -44,9 +43,6 @@ const createDB = (
               }
             })
           )
-          if ((typeof subscribe) === 'function') {
-            subscribe(cloneDeep(nextState));
-          }
           return nextState;
         });
       },
@@ -59,7 +55,8 @@ const createDB = (
           queryDefinitions[queryName],
           entities
         );
-      }
+      },
+      entities
     };
   };
   return [GlobalStateProvider, useDB];
