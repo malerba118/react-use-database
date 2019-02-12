@@ -8,7 +8,7 @@ function App() {
   const normalizedApi = useNormalizedApi();
   let [getPostsRequest, getPosts] = useAsync(normalizedApi.getPosts);
 
-  let posts = db.executeQuery("postsByIds", getPostsRequest.result || []);
+  let posts = db.executeStoredQuery("ALL_POSTS");
 
   useEffect(() => {
     getPosts();
@@ -17,7 +17,6 @@ function App() {
   useEffect(() => {
     console.log(db.entities)
   }, [db.entities])
-
 
   return (
     <div className="App">

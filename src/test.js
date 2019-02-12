@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { mount } from 'enzyme'
-import { initDB, getAppData, users } from './testHelpers'
+import { initDB, getAppData, users, models } from './testHelpers'
 
 const timeout = (n) => {
   return new Promise((resolve) => {
@@ -24,7 +24,7 @@ describe('useDB', () => {
 
     const App = (props) => {
       let db = useDB()
-      let posts = db.executeQuery('postsByIds', [])
+      let posts = db.executeStoredQuery('postsByIds')
       return <div id="data">{JSON.stringify(posts)}</div>
     }
 
@@ -37,16 +37,43 @@ describe('useDB', () => {
     expect(data).toEqual([]);
   })
 
-  it('default value works', async () => {
+  it('default entities works', async () => {
     let [DatabaseProvider, useDB] = initDB({
-      User: {
-        1: users[0]
+      defaultEntities: {
+        User: {
+          1: users[0]
+        }
       }
     })
 
     const App = (props) => {
       let db = useDB()
-      let user = db.executeQuery('userById', 1)
+      let user = db.executeQuery(1, models.UserSchema)
+      return <div id="data">{JSON.stringify(user)}</div>
+    }
+
+    let wrapper = mount(
+      <DatabaseProvider>
+        <App/>
+      </DatabaseProvider>
+    )
+    let data = getAppData(wrapper)
+    expect(data).toEqual(users[0]);
+  })
+
+  it('stored query defaultValue works', async () => {
+    let [DatabaseProvider, useDB] = initDB({
+      defaultEntities: {
+        User: {
+          1: users[0]
+        }
+      },
+      userByIdDefaultValue: 1
+    })
+
+    const App = (props) => {
+      let db = useDB()
+      let user = db.executeStoredQuery('userById')
       return <div id="data">{JSON.stringify(user)}</div>
     }
 
@@ -64,13 +91,14 @@ describe('useDB', () => {
 
     const App = (props) => {
       let db = useDB()
-      let user = db.executeQuery('userById', 1) || null
+      let user = db.executeStoredQuery('userById') || null
       useEffect(() => {
         db.mergeEntities({
           User: {
             1: users[0]
           }
         })
+        db.updateStoredQuery('userById', 1)
       }, [])
       return <div id="data">{JSON.stringify(user)}</div>
     }
@@ -88,16 +116,51 @@ describe('useDB', () => {
     expect(data).toEqual(users[0]);
   })
 
-  it('user changes eventually', async () => {
+  it('function setter works with updateStoredQuery', async () => {
     let [DatabaseProvider, useDB] = initDB({
-      User: {
-        1: users[0]
-      }
+      defaultEntities: {
+        User: {
+          0: users[0],
+          1: users[1]
+        }
+      },
+      userByIdDefaultValue: 0
     })
 
     const App = (props) => {
       let db = useDB()
-      let user = db.executeQuery('userById', 1) || null
+      let user = db.executeStoredQuery('userById') || null
+      useEffect(() => {
+        db.updateStoredQuery('userById', prevId => prevId + 1)
+      }, [])
+      return <div id="data">{JSON.stringify(user)}</div>
+    }
+
+    let wrapper = mount(
+      <DatabaseProvider>
+        <App/>
+      </DatabaseProvider>
+    )
+    let data = getAppData(wrapper)
+    expect(data).toEqual(users[0]);
+    await timeout(0)
+    wrapper.update()
+    data = getAppData(wrapper)
+    expect(data).toEqual(users[1]);
+  })
+
+  it('user changes eventually', async () => {
+    let [DatabaseProvider, useDB] = initDB({
+      defaultEntities: {
+        User: {
+          1: users[0],
+        }
+      },
+    })
+
+    const App = (props) => {
+      let db = useDB()
+      let user = db.executeQuery(1, models.UserSchema) || null
       useEffect(() => {
         db.mergeEntities({
           User: {
@@ -123,14 +186,16 @@ describe('useDB', () => {
 
   it('partial user update', async () => {
     let [DatabaseProvider, useDB] = initDB({
-      User: {
-        1: users[0]
-      }
+      defaultEntities: {
+        User: {
+          1: users[0]
+        }
+      },
     })
 
     const App = (props) => {
       let db = useDB()
-      let user = db.executeQuery('userById', 1) || null
+      let user = db.executeQuery(1, models.UserSchema) || null
       useEffect(() => {
         db.mergeEntities({
           User: {

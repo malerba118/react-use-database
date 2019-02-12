@@ -2620,13 +2620,21 @@ var createDB = function createDB(schemas, queryDefinitions) {
 
   schemas = Object.values(schemas);
 
-  var defaults$$1 = {};
+  var defaultEntities = {};
   schemas.forEach(function (schema) {
-    defaults$$1[schema.key] = {};
+    defaultEntities[schema.key] = {};
   });
-  defaults$$1 = _extends({}, defaults$$1, defaultValues);
+  defaultEntities = _extends({}, defaultEntities, defaultValues);
 
-  var _createGlobalState = createGlobalState({ db: defaults$$1 }),
+  var defaultQueries = {};
+  Object.keys(queryDefinitions).forEach(function (queryName) {
+    defaultQueries[queryName] = queryDefinitions[queryName].defaultValue;
+  });
+
+  var _createGlobalState = createGlobalState({
+    db: defaultEntities,
+    storedQueries: defaultQueries
+  }),
       GlobalStateProvider = _createGlobalState.GlobalStateProvider,
       useGlobalState = _createGlobalState.useGlobalState;
 
@@ -2635,6 +2643,15 @@ var createDB = function createDB(schemas, queryDefinitions) {
         _useGlobalState2 = slicedToArray(_useGlobalState, 2),
         entities = _useGlobalState2[0],
         setEntities = _useGlobalState2[1];
+
+    var _useGlobalState3 = useGlobalState("storedQueries"),
+        _useGlobalState4 = slicedToArray(_useGlobalState3, 2),
+        storedQueries = _useGlobalState4[0],
+        setStoredQueries = _useGlobalState4[1];
+
+    var executeQuery = function executeQuery(normalizedResult, schema) {
+      return denormalize(normalizedResult, schema, entities);
+    };
 
     return {
       mergeEntities: function mergeEntities(nextEntities, customizer) {
@@ -2647,12 +2664,31 @@ var createDB = function createDB(schemas, queryDefinitions) {
           return nextState;
         });
       },
-      executeQuery: function executeQuery(queryName, normalizedResult) {
+      updateStoredQuery: function updateStoredQuery(queryName, value) {
         if (!queryDefinitions[queryName]) {
-          throw new Error("No query exists with name " + queryName);
+          throw new Error("No stored query exists with name " + queryName);
         }
-        return denormalize(normalizedResult, queryDefinitions[queryName], entities);
+        setStoredQueries(function (prevState) {
+          var nextState = _extends({}, prevState);
+          var nextVal = void 0;
+          if (typeof value === 'function') {
+            nextVal = value(prevState[queryName]);
+          } else {
+            nextVal = value;
+          }
+          nextState[queryName] = nextVal;
+          return nextState;
+        });
       },
+      executeStoredQuery: function executeStoredQuery(queryName) {
+        if (!queryDefinitions[queryName]) {
+          throw new Error("No stored query exists with name " + queryName);
+        }
+        var normalizedResult = storedQueries[queryName];
+        var schema = queryDefinitions[queryName].schema;
+        return executeQuery(normalizedResult, schema);
+      },
+      executeQuery: executeQuery,
       entities: entities
     };
   };

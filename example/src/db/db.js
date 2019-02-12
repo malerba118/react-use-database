@@ -6,9 +6,10 @@ import createDB from "../react-use-database/index.es.js";
 let [ DatabaseProvider, useDB ] = createDB(
   models,
   {
-    postById: models.PostSchema,
-    postsByIds: [models.PostSchema],
-    getPostsResponse: apiSchemas.getPostsResponseSchema
+    ALL_POSTS: {
+      schema: [models.PostSchema],
+      defaultValue: []
+    },
   }
 );
 

@@ -14,7 +14,8 @@ const useNormalizedApi = () => {
         apiSchemas.getPostsResponseSchema
       );
       db.mergeEntities(entities);
-      return result;
+      db.updateStoredQuery('ALL_POSTS', result);
+      return [result, apiSchemas.getPostsResponseSchema];
     },
     likePost: async id => {
       let post = await api.likePost(id);
@@ -23,7 +24,7 @@ const useNormalizedApi = () => {
         apiSchemas.likePostResponseSchema
       );
       db.mergeEntities(entities);
-      return result;
+      return [result, apiSchemas.likePostResponseSchema];
     },
     unlikePost: async id => {
       let post = await api.unlikePost(id);
@@ -32,7 +33,7 @@ const useNormalizedApi = () => {
         apiSchemas.unlikePostResponseSchema
       );
       db.mergeEntities(entities);
-      return result;
+      return [result, apiSchemas.unlikePostResponseSchema];
     }
   };
 };

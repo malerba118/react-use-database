@@ -33,17 +33,29 @@ export const models = {
 
 export const getAppData = (app) => JSON.parse(app.find('#data').text())
 
-export const initDB = (defaultValues) => {
+export const initDB = ({defaultEntities, userByIdDefaultValue} = {}) => {
   return createDB(
     models,
     {
-      postById: models.PostSchema,
-      postsByIds: [models.PostSchema],
-      userById: models.UserSchema,
-      usersByIds: [models.UserSchema],
+      postById: {
+        schema: models.PostSchema,
+        defaultValue: null
+      },
+      postsByIds: {
+        schema: [models.PostSchema],
+        defaultValue: []
+      },
+      userById: {
+        schema: models.UserSchema,
+        defaultValue: userByIdDefaultValue === undefined ? null : userByIdDefaultValue
+      },
+      usersByIds: {
+        schema: [models.UserSchema],
+        defaultValue: []
+      }
     },
     {
-      defaultValues
+      defaultValues: defaultEntities
     }
   );
 }
