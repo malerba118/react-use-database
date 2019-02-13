@@ -6,8 +6,16 @@ import createDB from "../react-use-database/index.es.js";
 let [ DatabaseProvider, useDB ] = createDB(
   models,
   {
-    ALL_POSTS: {
-      schema: [models.PostSchema],
+    ALL_TODOS: {
+      schema: [models.TodoSchema],
+      defaultValue: []
+    },
+    ACTIVE_TODOS: {
+      schema: [models.TodoSchema],
+      defaultValue: []
+    },
+    COMPLETED_TODOS: {
+      schema: [models.TodoSchema],
       defaultValue: []
     },
   }

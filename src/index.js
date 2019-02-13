@@ -39,17 +39,29 @@ const createDB = (
     let [entities, setEntities] = useGlobalState("db");
     let [storedQueries, setStoredQueries] = useGlobalState("storedQueries");
 
-    const executeQuery = (normalizedResult, schema) => {
+    const executeQuery = ({schema, value}) => {
       return denormalize(
-        normalizedResult,
+        value,
         schema,
         entities
       );
-    }
+    };
+
+    const getStoredQuery = (queryName) => {
+      if (!queryDefinitions[queryName]) {
+        throw new Error(`No stored query exists with name ${queryName}`);
+      }
+      let schema = queryDefinitions[queryName].schema
+      let value = storedQueries[queryName]
+      return { schema, value }
+    };
 
     return {
       mergeEntities: (nextEntities, customizer) => {
         setEntities(prevEntities => {
+          if ((typeof nextEntities) === 'function') {
+            nextEntities = nextEntities(prevEntities)
+          }
           let nextState = mergeWith(
             {},
             prevEntities,
@@ -81,15 +93,13 @@ const createDB = (
         })
       },
       executeStoredQuery: (queryName) => {
-        if (!queryDefinitions[queryName]) {
-          throw new Error(`No stored query exists with name ${queryName}`);
-        }
-        let normalizedResult = storedQueries[queryName]
-        let schema = queryDefinitions[queryName].schema
-        return executeQuery(normalizedResult, schema)
+        let query = getStoredQuery(queryName)
+        return executeQuery(query)
       },
+      getStoredQuery,
       executeQuery,
-      entities
+      entities,
+      storedQueries
     };
   };
   return [GlobalStateProvider, useDB];

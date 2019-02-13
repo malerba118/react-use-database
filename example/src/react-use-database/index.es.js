@@ -2649,13 +2649,28 @@ var createDB = function createDB(schemas, queryDefinitions) {
         storedQueries = _useGlobalState4[0],
         setStoredQueries = _useGlobalState4[1];
 
-    var executeQuery = function executeQuery(normalizedResult, schema) {
-      return denormalize(normalizedResult, schema, entities);
+    var executeQuery = function executeQuery(_ref2) {
+      var schema = _ref2.schema,
+          value = _ref2.value;
+
+      return denormalize(value, schema, entities);
+    };
+
+    var getStoredQuery = function getStoredQuery(queryName) {
+      if (!queryDefinitions[queryName]) {
+        throw new Error("No stored query exists with name " + queryName);
+      }
+      var schema = queryDefinitions[queryName].schema;
+      var value = storedQueries[queryName];
+      return { schema: schema, value: value };
     };
 
     return {
       mergeEntities: function mergeEntities(nextEntities, customizer) {
         setEntities(function (prevEntities) {
+          if (typeof nextEntities === 'function') {
+            nextEntities = nextEntities(prevEntities);
+          }
           var nextState = mergeWith_1({}, prevEntities, nextEntities, customizer || function (objValue, srcValue) {
             if (isArray_1(objValue) || isArray_1(srcValue) || isSet_1(objValue) || isSet_1(srcValue)) {
               return srcValue;
@@ -2681,15 +2696,13 @@ var createDB = function createDB(schemas, queryDefinitions) {
         });
       },
       executeStoredQuery: function executeStoredQuery(queryName) {
-        if (!queryDefinitions[queryName]) {
-          throw new Error("No stored query exists with name " + queryName);
-        }
-        var normalizedResult = storedQueries[queryName];
-        var schema = queryDefinitions[queryName].schema;
-        return executeQuery(normalizedResult, schema);
+        var query = getStoredQuery(queryName);
+        return executeQuery(query);
       },
+      getStoredQuery: getStoredQuery,
       executeQuery: executeQuery,
-      entities: entities
+      entities: entities,
+      storedQueries: storedQueries
     };
   };
   return [GlobalStateProvider, useDB];

@@ -1,7 +1,7 @@
 import { schema } from "normalizr";
 
-export const PostSchema = new schema.Entity(
-  "Post",
+export const TodoSchema = new schema.Entity(
+  "Todo",
   {},
   {
     idAttribute: "id"

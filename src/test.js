@@ -48,7 +48,10 @@ describe('useDB', () => {
 
     const App = (props) => {
       let db = useDB()
-      let user = db.executeQuery(1, models.UserSchema)
+      let user = db.executeQuery({
+        value: 1,
+        schema: models.UserSchema
+      })
       return <div id="data">{JSON.stringify(user)}</div>
     }
 
@@ -160,7 +163,10 @@ describe('useDB', () => {
 
     const App = (props) => {
       let db = useDB()
-      let user = db.executeQuery(1, models.UserSchema) || null
+      let user = db.executeQuery({
+        value: 1,
+        schema: models.UserSchema
+      }) || null
       useEffect(() => {
         db.mergeEntities({
           User: {
@@ -195,7 +201,10 @@ describe('useDB', () => {
 
     const App = (props) => {
       let db = useDB()
-      let user = db.executeQuery(1, models.UserSchema) || null
+      let user = db.executeQuery({
+        value: 1,
+        schema: models.UserSchema
+      }) || null
       useEffect(() => {
         db.mergeEntities({
           User: {

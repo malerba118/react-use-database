@@ -3,38 +3,41 @@ import { useDB } from "./db";
 import * as apiSchemas from "./apiSchemas";
 import api from "../api";
 
+const filterQueries = {
+  'active': 'ACTIVE_TODOS',
+  'all': 'ALL_TODOS',
+  'completed': 'COMPLETED_TODOS'
+}
+
 const useNormalizedApi = () => {
   let db = useDB();
 
   return {
-    getPosts: async () => {
-      let posts = await api.getPosts();
+    fetchTodos: async (filter) => {
+      let todos = await api.fetchTodos(filter);
       let { result, entities } = normalize(
-        posts,
-        apiSchemas.getPostsResponseSchema
+        todos,
+        apiSchemas.fetchTodosResponseSchema
       );
       db.mergeEntities(entities);
-      db.updateStoredQuery('ALL_POSTS', result);
-      return [result, apiSchemas.getPostsResponseSchema];
+      db.updateStoredQuery(filterQueries[filter], result);
+      return {
+        value: result,
+        schema: apiSchemas.fetchTodosResponseSchema
+      };
     },
-    likePost: async id => {
-      let post = await api.likePost(id);
+    updateTodo: async (id, payload) => {
+      let todos = await api.updateTodo(id, payload);
       let { result, entities } = normalize(
-        post,
-        apiSchemas.likePostResponseSchema
+        todos,
+        apiSchemas.updateTodoResponseSchema
       );
       db.mergeEntities(entities);
-      return [result, apiSchemas.likePostResponseSchema];
+      return {
+        value: result,
+        schema: apiSchemas.updateTodoResponseSchema
+      };
     },
-    unlikePost: async id => {
-      let post = await api.unlikePost(id);
-      let { result, entities } = normalize(
-        post,
-        apiSchemas.unlikePostResponseSchema
-      );
-      db.mergeEntities(entities);
-      return [result, apiSchemas.unlikePostResponseSchema];
-    }
   };
 };
 

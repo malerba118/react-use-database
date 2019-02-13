@@ -1,5 +1,4 @@
-import { PostSchema } from "./models";
+import { TodoSchema } from "./models";
 
-export const getPostsResponseSchema = [PostSchema];
-export const likePostResponseSchema = PostSchema;
-export const unlikePostResponseSchema = PostSchema;
+export const fetchTodosResponseSchema = [TodoSchema];
+export const updateTodoResponseSchema = TodoSchema;
