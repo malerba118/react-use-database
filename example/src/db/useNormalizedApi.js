@@ -9,6 +9,18 @@ const filterQueries = {
   'completed': 'COMPLETED_TODOS'
 }
 
+const immutableOps = {
+  addId: (array, id) => {
+    if (!array.includes(id)) {
+      return [...array, id]
+    }
+    return array
+  },
+  removeId: (array, id) => {
+    return array.filter(itemId => itemId !== id)
+  }
+}
+
 const useNormalizedApi = () => {
   let db = useDB();
 
@@ -27,12 +39,20 @@ const useNormalizedApi = () => {
       };
     },
     updateTodo: async (id, payload) => {
-      let todos = await api.updateTodo(id, payload);
+      let todo = await api.updateTodo(id, payload);
       let { result, entities } = normalize(
-        todos,
+        todo,
         apiSchemas.updateTodoResponseSchema
       );
       db.mergeEntities(entities);
+      if (todo.completed) {
+        db.updateStoredQuery('ACTIVE_TODOS', (prev) => immutableOps.removeId(prev, id));
+        db.updateStoredQuery('COMPLETED_TODOS', (prev) => immutableOps.addId(prev, id));
+      }
+      else {
+        db.updateStoredQuery('ACTIVE_TODOS', (prev) => immutableOps.addId(prev, id));
+        db.updateStoredQuery('COMPLETED_TODOS', (prev) => immutableOps.removeId(prev, id));
+      }
       return {
         value: result,
         schema: apiSchemas.updateTodoResponseSchema
@@ -45,11 +65,32 @@ const useNormalizedApi = () => {
         apiSchemas.addTodoResponseSchema
       );
       db.mergeEntities(entities);
-      db.updateStoredQuery('ALL_TODOS', (prev) => [...prev, todo.id]);
-      db.updateStoredQuery('ACTIVE_TODOS', (prev) => [...prev, todo.id]);
+      db.updateStoredQuery('ALL_TODOS', (prev) => immutableOps.addId(prev, todo.id));
+      db.updateStoredQuery('ACTIVE_TODOS', (prev) => immutableOps.addId(prev, todo.id));
       return {
         value: result,
-        schema: apiSchemas.updateTodoResponseSchema
+        schema: apiSchemas.addTodoResponseSchema
+      };
+    },
+    deleteTodo: async (id) => {
+      let todo = await api.deleteTodo(id);
+      let { result, entities } = normalize(
+        todo,
+        apiSchemas.deleteTodoResponseSchema
+      );
+      db.mergeEntities({
+        Todo: {
+          [id]: {
+            isDeleted: true
+          }
+        }
+      });
+      db.updateStoredQuery('ALL_TODOS', (prev) => immutableOps.removeId(prev, id));
+      db.updateStoredQuery('ACTIVE_TODOS', (prev) => immutableOps.removeId(prev, id));
+      db.updateStoredQuery('COMPLETED_TODOS', (prev) => immutableOps.removeId(prev, id));
+      return {
+        value: result,
+        schema: apiSchemas.deleteTodoResponseSchema
       };
     },
   };
