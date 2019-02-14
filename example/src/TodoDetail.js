@@ -3,14 +3,18 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Checkbox from '@material-ui/core/Checkbox';
+import Button from '@material-ui/core/Button';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { useDB, useNormalizedApi, queries } from './db'
 
 const styles = theme => ({
-
+  button: {
+    margin: theme.spacing.unit,
+  }
 });
 
 function TodoDetail(props) {
+  const { classes } = props
 
   let normalizedApi = useNormalizedApi()
   let db = useDB();
@@ -60,8 +64,22 @@ function TodoDetail(props) {
             }
             label="Completed"
           />
-          <button onClick={updateTodo}>Update</button>
-          <button onClick={deleteTodo}>Delete</button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={updateTodo}
+            className={classes.button}
+          >
+            Update
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={deleteTodo}
+            className={classes.button}
+          >
+            Delete
+          </Button>
         </div>
       )}
     </div>

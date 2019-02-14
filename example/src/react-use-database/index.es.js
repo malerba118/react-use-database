@@ -2688,7 +2688,6 @@ var createDB = function createDB(schemas, queryDefinitions) {
           var nextVal = void 0;
           if (typeof value === 'function') {
             nextVal = value(prevState[queryName]);
-            console.log(queryName, nextVal);
           } else {
             nextVal = value;
           }

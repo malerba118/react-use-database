@@ -10,6 +10,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/AddCircleOutline';
+import Typography from '@material-ui/core/Typography';
 import AddTodoDialog from './AddTodoDialog';
 
 const drawerWidth = 360;
@@ -103,9 +104,12 @@ function Sidebar(props) {
             key={todo.id}
             onClick={(e) => props.onSelectedTodoChange(todo.id)}
           >
-            <span style={{color: props.selectedTodo === todo.id ? 'red' : 'black'}}>
-              {todo.text}
-            </span>
+          <Typography
+            variant="subtitle1"
+            color={props.selectedTodo === todo.id ? 'secondary' : 'textPrimary'} 
+          >
+            {todo.text}
+          </Typography>
           </ListItem>
         ))}
       </List>
