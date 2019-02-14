@@ -9,7 +9,7 @@ import Sidebar from './Sidebar';
 import TodoDetail from './TodoDetail';
 import { useDB, useNormalizedApi } from './db'
 
-const drawerWidth = 320;
+const drawerWidth = 360;
 
 const styles = theme => ({
   root: {
@@ -22,7 +22,6 @@ const styles = theme => ({
   toolbar: theme.mixins.toolbar,
   content: {
     flexGrow: 1,
-    backgroundColor: theme.palette.background.default,
     padding: theme.spacing.unit * 3,
   },
 });
@@ -37,21 +36,20 @@ function App(props) {
   const { classes } = props;
   let [filter, setFilter] = useState('active');
   let [selectedTodoId, setSelectedTodoId] = useState();
+
   let normalizedApi = useNormalizedApi()
   let db = useDB();
 
   useEffect(() => {
     normalizedApi.fetchTodos(filter)
-      .then(({value}) => {
-        setSelectedTodoId(value[0])
-      })
   }, [filter])
 
-  // useEffect(() => {
-  //   console.log(db.storedQueries)
-  // }, [db.storedQueries])
-
   let todos = db.executeStoredQuery(filterQueries[filter]);
+  let todoIds = JSON.stringify(todos.map(t => t.id))
+
+  useEffect(() => {
+    setSelectedTodoId(todos[0] && todos[0].id)
+  }, [todoIds])
 
   return (
     <div className={classes.root}>
