@@ -13,7 +13,60 @@ react-use-database combines normalizr, hooks, and a global data store to give yo
 npm install --save react-use-database
 ```
 
-## Usage
+## Simplest Usage
+
+```jsx
+import React from "react";
+import ReactDOM from "react-dom";
+import { schema } from "normalizr";
+import createDB from "react-use-database";
+
+const TodoSchema = new schema.Entity("Todo");
+
+let [ DatabaseProvider, useDB ] = createDB(
+  [TodoSchema],
+  {},
+  {
+    // Seed the database
+    defaultValues: {
+      Todo: {
+        1: {
+          id: 1,
+          text: 'Buy cheese'
+        }
+      }
+    }
+  }
+);
+
+const queries = {
+  getTodoById: (id) => {
+    return {
+      schema: TodoSchema,
+      value: id
+    }
+  }
+}
+
+const App = (props) => {
+  let db = useDB();
+  let queryToGetTodoWithIdOne = queries.getTodoById(1)
+  let todo = db.executeQuery(queryToGetTodoWithIdOne)
+  return <span>{todo.text}</span>
+}
+
+ReactDOM.render(
+  <DatabaseProvider>
+    <App />
+  </DatabaseProvider>,
+  document.getElementById("root")
+);
+
+```
+
+## Complex Usage
+#### See [example](https://github.com/malerba118/react-use-database/tree/master/example/src) for full code
+
 
 ```js
 // src/db/db.js
@@ -225,12 +278,6 @@ function App(props) {
 export default withStyles(styles)(App);
 ```
 
-
-## License
-
-MIT © [malerba118](https://github.com/malerba118)
-
-
 # API
 
 * [createDB](#createDB(schemas, storedQueryDefinitions, options))
@@ -285,3 +332,9 @@ let [ DatabaseProvider, useDB ] = createDB(
   }
 );
 ```
+
+## License
+
+MIT © [malerba118](https://github.com/malerba118)
+
+
