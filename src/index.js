@@ -7,32 +7,32 @@ import isSet from "lodash/isSet";
 import { createGlobalState } from "react-hooks-global-state";
 
 const createDB = (
-  schemas,
-  queryDefinitions,
+  entitySchemas,
   {
-    defaultValues,
+    storedQueryDefinitions = {},
+    defaultEntities = {},
   } = {}
 ) => {
-  schemas = Object.values(schemas);
+  entitySchemas = Object.values(entitySchemas);
 
   const getSchemaByName = name => {
-    return schemas.filter(s => s.key === name)[0] || null;
+    return entitySchemas.filter(s => s.key === name)[0] || null;
   };
 
-  let defaultEntities = {};
-  schemas.forEach(schema => {
-    defaultEntities[schema.key] = {};
+  let initialEntitiesState = {};
+  entitySchemas.forEach(schema => {
+    initialEntitiesState[schema.key] = {};
   });
-  defaultEntities = { ...defaultEntities, ...defaultValues };
+  initialEntitiesState = { ...initialEntitiesState, ...defaultEntities };
 
-  let defaultQueries = {};
-  Object.keys(queryDefinitions).forEach(queryName => {
-    defaultQueries[queryName] = queryDefinitions[queryName].defaultValue
+  let initialStoredQueriesState = {};
+  Object.keys(storedQueryDefinitions).forEach(queryName => {
+    initialStoredQueriesState[queryName] = storedQueryDefinitions[queryName].defaultValue
   });
 
   const { GlobalStateProvider, useGlobalState } = createGlobalState({
-    db: defaultEntities,
-    storedQueries: defaultQueries
+    db: initialEntitiesState,
+    storedQueries: initialStoredQueriesState
   });
 
   const useDB = () => {
@@ -48,10 +48,10 @@ const createDB = (
     };
 
     const getStoredQuery = (queryName) => {
-      if (!queryDefinitions[queryName]) {
+      if (!storedQueryDefinitions[queryName]) {
         throw new Error(`No stored query exists with name ${queryName}`);
       }
-      let schema = queryDefinitions[queryName].schema
+      let schema = storedQueryDefinitions[queryName].schema
       let value = storedQueries[queryName]
       return { schema, value }
     };
@@ -76,7 +76,7 @@ const createDB = (
         });
       },
       updateStoredQuery: (queryName, value) => {
-        if (!queryDefinitions[queryName]) {
+        if (!storedQueryDefinitions[queryName]) {
           throw new Error(`No stored query exists with name ${queryName}`);
         }
         setStoredQueries((prevState) => {

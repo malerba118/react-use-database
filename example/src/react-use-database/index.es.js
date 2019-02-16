@@ -2614,26 +2614,29 @@ var slicedToArray = function () {
   };
 }();
 
-var createDB = function createDB(schemas, queryDefinitions) {
-  var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-      defaultValues = _ref.defaultValues;
+var createDB = function createDB(entitySchemas) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref$storedQueryDefin = _ref.storedQueryDefinitions,
+      storedQueryDefinitions = _ref$storedQueryDefin === undefined ? {} : _ref$storedQueryDefin,
+      _ref$defaultEntities = _ref.defaultEntities,
+      defaultEntities = _ref$defaultEntities === undefined ? {} : _ref$defaultEntities;
 
-  schemas = Object.values(schemas);
+  entitySchemas = Object.values(entitySchemas);
 
-  var defaultEntities = {};
-  schemas.forEach(function (schema) {
-    defaultEntities[schema.key] = {};
+  var initialEntitiesState = {};
+  entitySchemas.forEach(function (schema) {
+    initialEntitiesState[schema.key] = {};
   });
-  defaultEntities = _extends({}, defaultEntities, defaultValues);
+  initialEntitiesState = _extends({}, initialEntitiesState, defaultEntities);
 
-  var defaultQueries = {};
-  Object.keys(queryDefinitions).forEach(function (queryName) {
-    defaultQueries[queryName] = queryDefinitions[queryName].defaultValue;
+  var initialStoredQueriesState = {};
+  Object.keys(storedQueryDefinitions).forEach(function (queryName) {
+    initialStoredQueriesState[queryName] = storedQueryDefinitions[queryName].defaultValue;
   });
 
   var _createGlobalState = createGlobalState({
-    db: defaultEntities,
-    storedQueries: defaultQueries
+    db: initialEntitiesState,
+    storedQueries: initialStoredQueriesState
   }),
       GlobalStateProvider = _createGlobalState.GlobalStateProvider,
       useGlobalState = _createGlobalState.useGlobalState;
@@ -2657,10 +2660,10 @@ var createDB = function createDB(schemas, queryDefinitions) {
     };
 
     var getStoredQuery = function getStoredQuery(queryName) {
-      if (!queryDefinitions[queryName]) {
+      if (!storedQueryDefinitions[queryName]) {
         throw new Error("No stored query exists with name " + queryName);
       }
-      var schema = queryDefinitions[queryName].schema;
+      var schema = storedQueryDefinitions[queryName].schema;
       var value = storedQueries[queryName];
       return { schema: schema, value: value };
     };
@@ -2680,7 +2683,7 @@ var createDB = function createDB(schemas, queryDefinitions) {
         });
       },
       updateStoredQuery: function updateStoredQuery(queryName, value) {
-        if (!queryDefinitions[queryName]) {
+        if (!storedQueryDefinitions[queryName]) {
           throw new Error("No stored query exists with name " + queryName);
         }
         setStoredQueries(function (prevState) {

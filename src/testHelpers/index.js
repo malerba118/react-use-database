@@ -37,25 +37,25 @@ export const initDB = ({defaultEntities, userByIdDefaultValue} = {}) => {
   return createDB(
     models,
     {
-      postById: {
-        schema: models.PostSchema,
-        defaultValue: null
+      storedQueryDefinitions: {
+        postById: {
+          schema: models.PostSchema,
+          defaultValue: null
+        },
+        postsByIds: {
+          schema: [models.PostSchema],
+          defaultValue: []
+        },
+        userById: {
+          schema: models.UserSchema,
+          defaultValue: userByIdDefaultValue === undefined ? null : userByIdDefaultValue
+        },
+        usersByIds: {
+          schema: [models.UserSchema],
+          defaultValue: []
+        }
       },
-      postsByIds: {
-        schema: [models.PostSchema],
-        defaultValue: []
-      },
-      userById: {
-        schema: models.UserSchema,
-        defaultValue: userByIdDefaultValue === undefined ? null : userByIdDefaultValue
-      },
-      usersByIds: {
-        schema: [models.UserSchema],
-        defaultValue: []
-      }
-    },
-    {
-      defaultValues: defaultEntities
+      defaultEntities
     }
   );
 }

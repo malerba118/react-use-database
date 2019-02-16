@@ -7,7 +7,13 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Sidebar from './Sidebar';
 import TodoDetail from './TodoDetail';
+import brace from 'brace';
+import AceEditor from 'react-ace';
+import ContainerDimensions from 'react-container-dimensions';
 import { useDB, useNormalizedApi } from './db'
+
+import 'brace/mode/json';
+import 'brace/theme/monokai';
 
 const drawerWidth = 360;
 
@@ -69,7 +75,73 @@ function App(props) {
       />
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        <TodoDetail id={selectedTodoId}/>
+        <div style={{height: '30%'}}>
+          <TodoDetail id={selectedTodoId}/>
+        </div>
+        <div style={{height: '70%', display: 'flex', justifyContent: 'space-between'}}>
+          <div style={{flex: 1, margin: 8}}>
+          <ContainerDimensions>
+              { ({ height, width }) => (
+                  <React.Fragment>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        background: '#252620',
+                        color: 'rgba(255, 255, 255, .8)',
+                        height: 48
+                      }}
+                    >
+                      Entity Store
+                    </div>
+                    <AceEditor
+                      value={JSON.stringify(db.entities, 2, 2)}
+                      mode="json"
+                      theme="monokai"
+                      width={width}
+                      height={320}
+                      readOnly
+                      name="entities-json"
+                      editorProps={{$blockScrolling: true}}
+                    />
+                  </React.Fragment>
+              ) }
+          </ContainerDimensions>
+          </div>
+          <div style={{flex: 1, margin: 8}}>
+            <ContainerDimensions>
+                { ({ height, width }) => (
+                  <React.Fragment>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        background: '#252620',
+                        color: 'rgba(255, 255, 255, .8)',
+                        height: 48
+                      }}
+                    >
+                      Query Store
+                    </div>
+                    <AceEditor
+                      value={JSON.stringify(db.storedQueries, 2, 2)}
+                      mode="json"
+                      theme="monokai"
+                      width={width}
+                      height={320}
+                      readOnly
+                      name="stored-queries-json"
+                      editorProps={{$blockScrolling: true}}
+                    />
+                  </React.Fragment>
+                ) }
+            </ContainerDimensions>
+          </div>
+        </div>
       </main>
     </div>
   );
