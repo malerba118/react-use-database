@@ -16,6 +16,10 @@ I used to implement relational state management with Redux/Normalizr. It worked 
 npm install --save react-use-database
 ```
 
+## Demo
+Live Demo: [https://malerba118.github.io/react-use-database/](https://malerba118.github.io/react-use-database/)
+Demo Code: [https://github.com/malerba118/react-use-database/tree/master/example/src](https://github.com/malerba118/react-use-database/tree/master/example/src)
+
 ## Simplest Usage
 
 ```jsx
@@ -68,7 +72,7 @@ ReactDOM.render(
 ```
 
 ## Complex Usage
-#### See the [live example]() and [example code](https://github.com/malerba118/react-use-database/tree/master/example/src) for a complex implementation
+#### See the [live example](https://malerba118.github.io/react-use-database/) and [example code](https://github.com/malerba118/react-use-database/tree/master/example/src) for a complex implementation
 
 
 ### Creating the Database
@@ -117,7 +121,7 @@ We also can easily perform optimistic updates by normalizing and merging entitie
 
 * [createDB](#createdbentityschemas-options)
   - [DatabaseProvider](#databaseprovider)
-  - [useDB](#useDB)
+  - [useDB](#usedb)
     - [mergeEntities](#mergeEntities)
     - [executeQuery](#executeQuery)
     - [getStoredQuery](#getStoredQuery)
@@ -181,6 +185,43 @@ ReactDOM.render(
   </DatabaseProvider>,
   document.getElementById("root")
 );
+```
+
+## `useDB`
+
+React database hook that allows you to query and update the database
+
+### Usage
+
+```js
+const useNormalizedApi = () => {
+  let db = useDB();
+  
+  return {
+    ...
+    addTodo: async (text) => {
+      let todo = await api.addTodo(text);
+      let { result, entities } = normalize(
+        todo,
+        apiSchemas.addTodoResponseSchema
+      );
+      db.mergeEntities(entities); // Merge new todo data into database
+      db.updateStoredQuery('ALL_TODOS', (prevArray) => [...prevArray, todo.id]); 
+    },
+    ...
+  };
+};
+  
+const TodosComponent = (props) => {
+  let db = useDB();
+  
+  let allTodosQuery = db.getStoredQuery('ALL_TODOS');
+  let todos = db.executeQuery(allTodosQuery);
+  
+  return (
+    <JSON data={todos} />
+  )
+}
 ```
 
 ## License
