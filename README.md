@@ -135,7 +135,7 @@ Creates DatabaseProvider and useDB hook.
 
 * `entitySchemas`: **required** Array or object whose values are normalizr Entity schemas
 * `options`: **optional** options
-  - `storedQueryDefinitions`: **required** Object whose keys are query names and whose values have form `{ schema, defaultValue }`
+  - `storedQueryDefinitions`: Object whose keys are query names and whose values have form `{ schema, defaultValue }`
   - `defaultEntities` : An entities object to seed the database
 
 
@@ -220,6 +220,39 @@ const TodosComponent = (props) => {
   
   return (
     <JSON data={todos} />
+  )
+}
+```
+
+## `mergeEntities(entitiesPatch, customizer)`
+
+Method to deep merge an entities patch onto the current entities object to produce next entities state.
+
+* `entitiesPatch`: **required** function or partial entities object. If function, one argument will be passed, the current entities. Under the hood, lodash's mergeWith is called to merge the entitiesPatch onto the current entities to produce the next enitities object.
+* `customizer`: **optional** overrides [default customizer implementation](https://gist.github.com/malerba118/20b8bd16f6fe73568511f5c57b84a2b2) passed to lodash's [mergeWith](https://lodash.com/docs/#mergeWith)
+
+### Usage
+
+```js
+const TodosComponent = (props) => {
+  let db = useDB();
+  
+  let todo = db.executeQuery({schema: TodoSchema, value: 1});
+  
+  useEffect(() => {
+    db.mergeEntities({
+      Todo: {
+        1: {
+          id: 1,
+          text: 'Buy cheese',
+          completed: false
+        }
+      }
+    })
+  }, [])
+  
+  return (
+    <JSON data={todo} />
   )
 }
 ```
