@@ -17,7 +17,7 @@ npm install --save react-use-database
 ```
 
 ## Demo
-Live Demo: [https://malerba118.github.io/react-use-database/](https://malerba118.github.io/react-use-database/)
+Live Demo: [https://malerba118.github.io/react-use-database/](https://malerba118.github.io/react-use-database/)<br/>
 Demo Code: [https://github.com/malerba118/react-use-database/tree/master/example/src](https://github.com/malerba118/react-use-database/tree/master/example/src)
 
 ## Simplest Usage
@@ -78,6 +78,7 @@ ReactDOM.render(
 ### Creating the Database
 
 ![](https://cdn-images-1.medium.com/max/2720/1*V8LylLWivGzNPevDvY51qQ.png)
+<center>[See the code](https://gist.github.com/malerba118/a05777cb4c49d37d8b6e4953f6be43d7)</center>
 
 Once we wrap our app in the DatabaseProvider we’re good to go. We can now use our database hook in any component to query the database.
 
