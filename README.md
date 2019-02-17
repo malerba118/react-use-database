@@ -130,7 +130,7 @@ Because a query is just a schema and value, we can create our own queries whose 
 * [createDB](#createdbentityschemas-options)
   - [DatabaseProvider](#databaseprovider)
   - [useDB](#usedb)
-    - [mergeEntities](#mergeentitiesentitiespatch-customizer))
+    - [mergeEntities](#mergeentitiesentitiespatch-options)
     - [executeQuery](#executequeryquery)
     - [getStoredQuery](#getstoredquerystoredqueryname)
     - [executeStoredQuery](#executestoredquerystoredqueryname)
@@ -232,7 +232,7 @@ const TodosComponent = (props) => {
 }
 ```
 
-## `mergeEntities(entitiesPatch, customizer)`
+## `mergeEntities(entitiesPatch, options)`
 
 Deep merges an entities patch onto the current entities object to produce next entities state.
 
@@ -270,7 +270,7 @@ const TodosComponent = (props) => {
 
 Executes a query against the database (db.entities).
 
-* `query`: **required** object with shape `{schema: normalizr.schema, value: object}`
+* `query`: **required** object with shape `{schema: normalizr.schema, value: any}`
 
 ### Usage
 
@@ -324,7 +324,7 @@ const TodosComponent = (props) => {
 
 ## `executeStoredQuery(storedQueryName)`
 
-An alias for db.executeQuery(db.getStoredQuery(storedQueryName)).
+An alias for `db.executeQuery(db.getStoredQuery(storedQueryName))`.
 
 ### Usage
 
