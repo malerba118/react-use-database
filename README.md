@@ -130,10 +130,10 @@ Because a query is just a schema and value, we can create our own queries whose 
 * [createDB](#createdbentityschemas-options)
   - [DatabaseProvider](#databaseprovider)
   - [useDB](#usedb)
-    - [mergeEntities](#mergeEntities)
-    - [executeQuery](#executeQuery)
-    - [getStoredQuery](#getStoredQuery)
-    - [executeStoredQuery](#executeStoredQuery)
+    - [mergeEntities](#mergeentitiesentitiespatch-customizer))
+    - [executeQuery](#executequeryquery)
+    - [getStoredQuery](#getstoredquerystoredqueryname)
+    - [executeStoredQuery](#executestoredquerystoredqueryname)
     - [entities](#entities)
     - [storedQueries](#storedQueries)
 
@@ -195,7 +195,7 @@ ReactDOM.render(
 );
 ```
 
-## `useDB`
+## `useDB()`
 
 React database hook that allows you to query and update the database
 
@@ -234,10 +234,11 @@ const TodosComponent = (props) => {
 
 ## `mergeEntities(entitiesPatch, customizer)`
 
-Method to deep merge an entities patch onto the current entities object to produce next entities state.
+Deep merges an entities patch onto the current entities object to produce next entities state.
 
 * `entitiesPatch`: **required** function or partial entities object. If function, one argument will be passed, the current entities. Under the hood, lodash's mergeWith is called to merge the entitiesPatch onto the current entities to produce the next enitities object.
-* `customizer`: **optional** overrides [default customizer implementation](https://gist.github.com/malerba118/20b8bd16f6fe73568511f5c57b84a2b2) passed to lodash's [mergeWith](https://lodash.com/docs/#mergeWith)
+* `options`: **optional** options
+  - `customizer`: overrides [default customizer implementation](https://gist.github.com/malerba118/20b8bd16f6fe73568511f5c57b84a2b2) passed to lodash's [mergeWith](https://lodash.com/docs/#mergeWith)
 
 ### Usage
 
@@ -262,6 +263,122 @@ const TodosComponent = (props) => {
   return (
     <JSON data={todo} />
   )
+}
+```
+
+## `executeQuery(query)`
+
+Executes a query against the database (db.entities).
+
+* `query`: **required** object with shape `{schema: normalizr.schema, value: object}`
+
+### Usage
+
+```js
+const TodosComponent = (props) => {
+  let db = useDB();
+  
+  let todos = db.executeQuery({schema: [TodoSchema], value: [1, 2, 3]});
+
+  return (
+    <JSON data={todos} />
+  )
+}
+```
+
+## `getStoredQuery(storedQueryName)`
+
+Gets the current query state for the query name provided.
+
+* `query`: **required** object with shape `{schema: normalizr.schema, value: object}`
+
+### Usage
+
+```js
+const models = [TodoSchema]
+
+let [ DatabaseProvider, useDB ] = createDB(
+  models,
+  {
+    storedQueryDefinitions: {
+      ALL_TODOS: {
+        schema: [TodoSchema],
+        defaultValue: [1, 2, 3]
+      }
+    }
+  }
+);
+
+const TodosComponent = (props) => {
+  let db = useDB();
+  
+  let allTodosQuery = db.getStoredQuery('ALL_TODOS');
+  console.log(allTodosQuery) // -> {schema: [TodoSchema], value: [1, 2, 3]}
+  let todos = db.executeQuery(allTodosQuery);
+
+  return (
+    <JSON data={todos} />
+  )
+}
+```
+
+## `executeStoredQuery(storedQueryName)`
+
+An alias for db.executeQuery(db.getStoredQuery(storedQueryName)).
+
+### Usage
+
+```js
+const TodosComponent = (props) => {
+  let db = useDB();
+  
+  let todos = db.executeStoredQuery('ALL_TODOS');
+  
+  return (
+    <JSON data={todos} />
+  )
+}
+```
+
+## `entities`
+
+The root data object from the entity store. Useful to listen to state changes.
+Could be used to persist parts of state to local storage or to implement undo/redo features.
+Entities save to local storage could be used to hydrate the store via createDB's defaultEntities option.
+
+### Usage
+
+```js
+let [ DatabaseProvider, useDB ] = createDB(
+  models,
+  {
+    defaultEntities: LocalStorageClient.loadState('entities')
+  }
+);
+
+const useEntityListener = () => {
+  let db = useDB();
+  
+  useEffect(() => {
+    LocalStorageClient.saveState('entities', db.entities)
+  }, [db.entities])
+}
+```
+
+## `storedQueries`
+
+The root data object from the query store. Useful to listen to state changes.
+Could be used to persist parts of state to local storage or to implement undo/redo features.
+
+### Usage
+
+```js
+const useStoredQueryListener = () => {
+  let db = useDB();
+  
+  useEffect(() => {
+    //do something
+  }, [db.storedQueries])
 }
 ```
 
