@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
 const useAsync = fn => {
+  let currentPromise = useRef(null)
   const [state, setState] = useState({
     pending: false,
     fulfilled: false,
@@ -18,8 +19,13 @@ const useAsync = fn => {
         rejected: false,
         result: undefined
       }));
+      let prom = fn(...arguments);
+      currentPromise.current = prom
       try {
-        let result = await fn(...arguments);
+        let result = await prom
+        if (prom !== currentPromise.current) {
+          return
+        }
         setState(prevState => ({
           ...prevState,
           pending: false,
@@ -27,6 +33,9 @@ const useAsync = fn => {
           result: result
         }));
       } catch (e) {
+        if (prom !== currentPromise.current) {
+          return
+        }
         setState(prevState => ({
           ...prevState,
           pending: false,
