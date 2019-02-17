@@ -2,7 +2,10 @@
 
 > relational data at its simplest
 
-react-use-database combines normalizr, hooks, and a global data store to give you a simple interface to manage relational data on the client.
+react-use-database gives you an opinionated interface, efficient data flow, and concise global state management. It forces you to think about your client-side data in the context of a queryable database. It gives you two global data stores: an entity store and a query store. The entity store contains all of your model data. It’s just a giant json blob that is **the source of truth** for any **database entity** that you have defined via Normalizr’s notion of schemas (eg UserSchema, TodoSchema, CommentSchema, etc.). But, what good is a database without a way to pull data from it? That’s where the query store comes in. A query is comprised of a schema and a value. The query `{schema: UserSchema, value: 32}` would return you a user whose id is 32. The query `{schema: [UserSchema], value: [32]}` would return you a singleton array of the user whose id is 32. By tracking and updating your entities and queries in their respective stores, **every component can have access to the latest data with minimal code and minimal effort**. Note, [Normalizr](https://github.com/paularmstrong/normalizr) is a peer dependency of react-use-database, you should familiarize yourself with it.
+
+I used to implement relational state management with Redux/Normalizr. It worked well, but there was too much boilerplate and trying to onboard a new-hire to the idea was incredibly daunting. Redux and Normalizr are an incredible pairing, Dan Abramov was really onto something with his creation of each (He’s even done an [Egghead tutorial series](https://egghead.io/courses/building-react-applications-with-idiomatic-redux)  in which he describes almost the exact design pattern I’ve implemented in this library). The problem with Redux is that it lacks opinionation and it can be overwhelmingly verbose. It’s vulnerable to anti-patterns and there’s nothing inherent to its API to enforce its proper use. When used improperly, redux can become more of a burden than an asset.
+
 
 
 [![NPM](https://img.shields.io/npm/v/react-use-database.svg)](https://www.npmjs.com/package/react-use-database) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
@@ -12,6 +15,10 @@ react-use-database combines normalizr, hooks, and a global data store to give yo
 ```bash
 npm install --save react-use-database
 ```
+
+## Demo
+Live Demo: [https://malerba118.github.io/react-use-database/](https://malerba118.github.io/react-use-database/)<br/>
+Demo Code: [https://github.com/malerba118/react-use-database/tree/master/example/src](https://github.com/malerba118/react-use-database/tree/master/example/src)
 
 ## Simplest Usage
 
@@ -65,224 +72,64 @@ ReactDOM.render(
 ```
 
 ## Complex Usage
-#### See [example](https://github.com/malerba118/react-use-database/tree/master/example/src) for full code
+#### See the [live example](https://malerba118.github.io/react-use-database/) and [example code](https://github.com/malerba118/react-use-database/tree/master/example/src) for a complex implementation
 
 
-```js
-// src/db/db.js
-import * as models from "./models";
-import createDB from "react-use-database";
+### Creating the Database
 
-let [ DatabaseProvider, useDB ] = createDB(
-  models,
-  {
-    ALL_TODOS: {
-      schema: [models.TodoSchema],
-      defaultValue: []
-    },
-    ACTIVE_TODOS: {
-      schema: [models.TodoSchema],
-      defaultValue: []
-    },
-    COMPLETED_TODOS: {
-      schema: [models.TodoSchema],
-      defaultValue: []
-    },
-  }
-);
+![](https://cdn-images-1.medium.com/max/2720/1*V8LylLWivGzNPevDvY51qQ.png)
+<p align="center"><a href="https://gist.github.com/malerba118/a05777cb4c49d37d8b6e4953f6be43d7">See the code</a></p>
 
-export { useDB, DatabaseProvider }
-```
+Once we wrap our app in the DatabaseProvider we’re good to go. We can now use our database hook in any component to query the database.
 
+### Fetching Todos
 
-```jsx
-// src/index.js
-import React from "react";
-import ReactDOM from "react-dom";
-import { DatabaseProvider } from "./db";
-import App from './App'
+![](https://cdn-images-1.medium.com/max/2720/1*42oSAxGOGmhIxHRvmvPsDg.png)
+<p align="center"><a href="https://gist.github.com/malerba118/e05440feed68ce4c1ba9d351274a621d">See the code</a></p>
 
-ReactDOM.render(
-  <DatabaseProvider>
-    <App />
-  </DatabaseProvider>,
-  document.getElementById("root")
-);
-```
+Boom, now you can fetchTodos from anywhere and your TodosComponent will re-render with the latest list of todos.
 
-```javascript
-// src/db/useNormalizedApi.js
-import { normalize } from "normalizr";
-import { useDB } from "./db";
-import * as apiSchemas from "./apiSchemas";
-import api from "../api";
+### Updating a Todo
 
-const filterQueries = {
-  'active': 'ACTIVE_TODOS',
-  'all': 'ALL_TODOS',
-  'completed': 'COMPLETED_TODOS'
-}
+![](https://cdn-images-1.medium.com/max/2720/1*KpcKDaCjEcYM5fe6ZET3IQ.png)
+<p align="center"><a href="https://gist.github.com/malerba118/dc6bbb461de546040497a7f1a5561e99">See the code</a></p>
 
-const immutableOps = {
-  addId: (array, id) => {
-    if (!array.includes(id)) {
-      return [...array, id]
-    }
-    return array
-  },
-  removeId: (array, id) => {
-    return array.filter(itemId => itemId !== id)
-  }
-}
+This has to be my favorite one. You don’t even need to update any queries. You just take the updated Todo from the response body, normalize it, and deep merge it into the entity store and then your TodosComponent re-renders with the updated data. Virtually zero effort involved.
 
-const useNormalizedApi = () => {
-  let db = useDB();
+### Creating a Todo
 
-  return {
-    fetchTodos: async (filter) => {
-      let todos = await api.fetchTodos(filter);
-      let { result, entities } = normalize(
-        todos,
-        apiSchemas.fetchTodosResponseSchema
-      );
-      db.mergeEntities(entities);
-      db.updateStoredQuery(filterQueries[filter], result);
-      return {
-        value: result,
-        schema: apiSchemas.fetchTodosResponseSchema
-      };
-    },
-    updateTodo: async (id, payload) => {
-      let todo = await api.updateTodo(id, payload);
-      let { result, entities } = normalize(
-        todo,
-        apiSchemas.updateTodoResponseSchema
-      );
-      db.mergeEntities(entities);
-      if (todo.completed) {
-        db.updateStoredQuery('ACTIVE_TODOS', (prev) => immutableOps.removeId(prev, id));
-        db.updateStoredQuery('COMPLETED_TODOS', (prev) => immutableOps.addId(prev, id));
-      }
-      else {
-        db.updateStoredQuery('ACTIVE_TODOS', (prev) => immutableOps.addId(prev, id));
-        db.updateStoredQuery('COMPLETED_TODOS', (prev) => immutableOps.removeId(prev, id));
-      }
-      return {
-        value: result,
-        schema: apiSchemas.updateTodoResponseSchema
-      };
-    },
-    addTodo: async (text) => {
-      let todo = await api.addTodo(text);
-      let { result, entities } = normalize(
-        todo,
-        apiSchemas.addTodoResponseSchema
-      );
-      db.mergeEntities(entities);
-      db.updateStoredQuery('ALL_TODOS', (prev) => immutableOps.addId(prev, todo.id));
-      db.updateStoredQuery('ACTIVE_TODOS', (prev) => immutableOps.addId(prev, todo.id));
-      return {
-        value: result,
-        schema: apiSchemas.addTodoResponseSchema
-      };
-    },
-    deleteTodo: async (id) => {
-      let todo = await api.deleteTodo(id);
-      let { result, entities } = normalize(
-        todo,
-        apiSchemas.deleteTodoResponseSchema
-      );
-      db.mergeEntities({
-        Todo: {
-          [id]: {
-            isDeleted: true
-          }
-        }
-      });
-      db.updateStoredQuery('ALL_TODOS', (prev) => immutableOps.removeId(prev, id));
-      db.updateStoredQuery('ACTIVE_TODOS', (prev) => immutableOps.removeId(prev, id));
-      db.updateStoredQuery('COMPLETED_TODOS', (prev) => immutableOps.removeId(prev, id));
-      return {
-        value: result,
-        schema: apiSchemas.deleteTodoResponseSchema
-      };
-    },
-  };
-};
+![](https://cdn-images-1.medium.com/max/2720/1*U3NpXweaAzG2hLr4ptcjQA.png)
+<p align="center"><a href="https://gist.github.com/malerba118/8a52d13b62af4dafa5f8fed5d2182cb3">See the code</a></p>
 
-export default useNormalizedApi;
-```
+You might be seeing a pattern here. Updating the database is almost always as simple as normalizing data and passing the entities object to mergeEntities. This deep merges the entities patch onto the existing entities object. Once our Todo is created, we need to add its id to our ALL_TODOS query. Once this is done, our TodosComponent will re-render with the new todo.
 
-```jsx
-// src/App.js
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Sidebar from './Sidebar';
-import TodoDetail from './TodoDetail';
-import { useDB, useNormalizedApi } from './db'
-import styles from './styles'
+### Deleting a Todo
 
-const filterQueries = {
-  'active': 'ACTIVE_TODOS',
-  'all': 'ALL_TODOS',
-  'completed': 'COMPLETED_TODOS'
-}
+![](https://cdn-images-1.medium.com/max/2720/1*ukOIy0ITc6IFtv7kl9E5fA.png)
+<p align="center"><a href="https://gist.github.com/malerba118/00888f9374dc49a911eb54a218d831a9">See the code</a></p>
 
-function App(props) {
-  const { classes } = props;
-  let [filter, setFilter] = useState('active');
-  let [selectedTodoId, setSelectedTodoId] = useState();
+To delete a todo, we can add a soft delete indicator to the todo in the database and we can update any relevant queries to omit the deleted todo id. Here’s a case where we probably don’t want to just normalize the data from the response and call mergeEntities on it.
 
-  let normalizedApi = useNormalizedApi()
-  let db = useDB();
+### Optimistic Updates
 
-  useEffect(() => {
-    normalizedApi.fetchTodos(filter)
-  }, [filter])
+![](https://cdn-images-1.medium.com/max/2720/1*5xJferZ41I7VAj4OBnnUsg.png)
+<p align="center"><a href="https://gist.github.com/malerba118/d412832a11d977e0a694aebe8cd8aaaa">See the code</a></p>
 
-  let todos = db.executeStoredQuery(filterQueries[filter]);
-  let todoIds = JSON.stringify(todos.map(t => t.id))
+We also can easily perform optimistic updates by normalizing and merging entities before the API call has finished. And then if the API call comes back with an error level status code, we can merge the original todo back into entities to revert the update.
 
-  useEffect(() => {
-    setSelectedTodoId(todos[0] && todos[0].id)
-  }, [todoIds])
+### Other Queries
 
-  return (
-    <div className={classes.root}>
-      <AppBar position="fixed" className={classes.appBar}>
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-            Todo App
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Sidebar
-        todos={todos}
-        filter={filter}
-        onFilterChange={setFilter}
-        selectedTodo={selectedTodoId}
-        onSelectedTodoChange={setSelectedTodoId}
-      />
-      <main className={classes.content}>
-        <div className={classes.toolbar} />
-        <TodoDetail id={selectedTodoId}/>
-      </main>
-    </div>
-  );
-}
+![](https://cdn-images-1.medium.com/max/2720/1*scCLgWI1O986v03_r7LWNg.png)
+<p align="center"><a href="https://gist.github.com/malerba118/227195192ed374a2780e81c3178412cd">See the code</a></p>
 
-export default withStyles(styles)(App);
-```
+Because a query is just a schema and value, we can create our own queries whose state is not tracked by the query store. For example, if we received a todo id as a url parameter, we could do something like the above.
+
 
 # API
 
-* [createDB](#createDB(schemas, storedQueryDefinitions, options))
-  - [DatabaseProvider](#DatabaseProvider)
-  - [useDB](#useDB)
+* [createDB](#createdbentityschemas-options)
+  - [DatabaseProvider](#databaseprovider)
+  - [useDB](#usedb)
     - [mergeEntities](#mergeEntities)
     - [executeQuery](#executeQuery)
     - [getStoredQuery](#getStoredQuery)
@@ -290,14 +137,14 @@ export default withStyles(styles)(App);
     - [entities](#entities)
     - [storedQueries](#storedQueries)
 
-## `createDB(schemas, storedQueryDefinitions, options)`
+## `createDB(entitySchemas, options)`
 
 Creates DatabaseProvider and useDB hook.
 
-* `schemas`: **required** Array or object whose values are normalizr Entity schemas
-* `storedQueryDefinitions`: **required** Object whose keys are query names and whose values have form `{ schema, defaultValue }`
+* `entitySchemas`: **required** Array or object whose values are normalizr Entity schemas
 * `options`: **optional** options
-  - `defaultValues` : An entities object to seed the database
+  - `storedQueryDefinitions`: Object whose keys are query names and whose values have form `{ schema, defaultValue }`
+  - `defaultEntities` : An entities object to seed the database
 
 
 ### Usage
@@ -306,21 +153,21 @@ Creates DatabaseProvider and useDB hook.
 let [ DatabaseProvider, useDB ] = createDB(
   models,
   {
-    ALL_TODOS: {
-      schema: [models.TodoSchema],
-      defaultValue: []
+    storedQueryDefinitions: {
+      ALL_TODOS: {
+        schema: [models.TodoSchema],
+        defaultValue: []
+      },
+      ACTIVE_TODOS: {
+        schema: [models.TodoSchema],
+        defaultValue: []
+      },
+      COMPLETED_TODOS: {
+        schema: [models.TodoSchema],
+        defaultValue: []
+      },
     },
-    ACTIVE_TODOS: {
-      schema: [models.TodoSchema],
-      defaultValue: []
-    },
-    COMPLETED_TODOS: {
-      schema: [models.TodoSchema],
-      defaultValue: []
-    },
-  },
-  {
-    defaultValues: {
+    defaultEntities: {
       Todo: {
         1: {
           id: 1,
@@ -331,6 +178,91 @@ let [ DatabaseProvider, useDB ] = createDB(
     }
   }
 );
+```
+
+## `DatabaseProvider`
+
+React context provider that enables react-use-database to have global state.
+
+### Usage
+
+```js
+ReactDOM.render(
+  <DatabaseProvider>
+    <App />
+  </DatabaseProvider>,
+  document.getElementById("root")
+);
+```
+
+## `useDB`
+
+React database hook that allows you to query and update the database
+
+### Usage
+
+```js
+const useNormalizedApi = () => {
+  let db = useDB();
+  
+  return {
+    ...
+    addTodo: async (text) => {
+      let todo = await api.addTodo(text);
+      let { result, entities } = normalize(
+        todo,
+        apiSchemas.addTodoResponseSchema
+      );
+      db.mergeEntities(entities); // Merge new todo data into database
+      db.updateStoredQuery('ALL_TODOS', (prevArray) => [...prevArray, todo.id]); 
+    },
+    ...
+  };
+};
+  
+const TodosComponent = (props) => {
+  let db = useDB();
+  
+  let allTodosQuery = db.getStoredQuery('ALL_TODOS');
+  let todos = db.executeQuery(allTodosQuery);
+  
+  return (
+    <JSON data={todos} />
+  )
+}
+```
+
+## `mergeEntities(entitiesPatch, customizer)`
+
+Method to deep merge an entities patch onto the current entities object to produce next entities state.
+
+* `entitiesPatch`: **required** function or partial entities object. If function, one argument will be passed, the current entities. Under the hood, lodash's mergeWith is called to merge the entitiesPatch onto the current entities to produce the next enitities object.
+* `customizer`: **optional** overrides [default customizer implementation](https://gist.github.com/malerba118/20b8bd16f6fe73568511f5c57b84a2b2) passed to lodash's [mergeWith](https://lodash.com/docs/#mergeWith)
+
+### Usage
+
+```js
+const TodosComponent = (props) => {
+  let db = useDB();
+  
+  let todo = db.executeQuery({schema: TodoSchema, value: 1});
+  
+  useEffect(() => {
+    db.mergeEntities({
+      Todo: {
+        1: {
+          id: 1,
+          text: 'Buy cheese',
+          completed: false
+        }
+      }
+    })
+  }, [])
+  
+  return (
+    <JSON data={todo} />
+  )
+}
 ```
 
 ## License
