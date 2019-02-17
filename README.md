@@ -78,45 +78,52 @@ ReactDOM.render(
 ### Creating the Database
 
 ![](https://cdn-images-1.medium.com/max/2720/1*V8LylLWivGzNPevDvY51qQ.png)
-<center>[See the code](https://gist.github.com/malerba118/a05777cb4c49d37d8b6e4953f6be43d7)</center>
+<p align="center"><a href="https://gist.github.com/malerba118/a05777cb4c49d37d8b6e4953f6be43d7">See the code</a></p>
 
 Once we wrap our app in the DatabaseProvider we’re good to go. We can now use our database hook in any component to query the database.
 
 ### Fetching Todos
 
 ![](https://cdn-images-1.medium.com/max/2720/1*42oSAxGOGmhIxHRvmvPsDg.png)
+<p align="center"><a href="https://gist.github.com/malerba118/e05440feed68ce4c1ba9d351274a621d">See the code</a></p>
 
 Boom, now you can fetchTodos from anywhere and your TodosComponent will re-render with the latest list of todos.
 
 ### Updating a Todo
 
 ![](https://cdn-images-1.medium.com/max/2720/1*KpcKDaCjEcYM5fe6ZET3IQ.png)
+<p align="center"><a href="https://gist.github.com/malerba118/dc6bbb461de546040497a7f1a5561e99">See the code</a></p>
 
 This has to be my favorite one. You don’t even need to update any queries. You just take the updated Todo from the response body, normalize it, and deep merge it into the entity store and then your TodosComponent re-renders with the updated data. Virtually zero effort involved.
 
 ### Creating a Todo
 
 ![](https://cdn-images-1.medium.com/max/2720/1*U3NpXweaAzG2hLr4ptcjQA.png)
+<p align="center"><a href="https://gist.github.com/malerba118/8a52d13b62af4dafa5f8fed5d2182cb3">See the code</a></p>
 
 You might be seeing a pattern here. Updating the database is almost always as simple as normalizing data and passing the entities object to mergeEntities. This deep merges the entities patch onto the existing entities object. Once our Todo is created, we need to add its id to our ALL_TODOS query. Once this is done, our TodosComponent will re-render with the new todo.
 
 ### Deleting a Todo
 
 ![](https://cdn-images-1.medium.com/max/2720/1*ukOIy0ITc6IFtv7kl9E5fA.png)
+<p align="center"><a href="https://gist.github.com/malerba118/00888f9374dc49a911eb54a218d831a9">See the code</a></p>
 
 To delete a todo, we can add a soft delete indicator to the todo in the database and we can update any relevant queries to omit the deleted todo id. Here’s a case where we probably don’t want to just normalize the data from the response and call mergeEntities on it.
-
-### Other Queries
-
-![](https://cdn-images-1.medium.com/max/2720/1*scCLgWI1O986v03_r7LWNg.png)
-
-Because a query is just a schema and value, we can create our own queries whose state is not tracked by the query store. For example, if we received a todo id as a url parameter, we could do something like the above.
 
 ### Optimistic Updates
 
 ![](https://cdn-images-1.medium.com/max/2720/1*5xJferZ41I7VAj4OBnnUsg.png)
+<p align="center"><a href="https://gist.github.com/malerba118/d412832a11d977e0a694aebe8cd8aaaa">See the code</a></p>
 
 We also can easily perform optimistic updates by normalizing and merging entities before the API call has finished. And then if the API call comes back with an error level status code, we can merge the original todo back into entities to revert the update.
+
+### Other Queries
+
+![](https://cdn-images-1.medium.com/max/2720/1*scCLgWI1O986v03_r7LWNg.png)
+<p align="center"><a href="https://gist.github.com/malerba118/227195192ed374a2780e81c3178412cd">See the code</a></p>
+
+Because a query is just a schema and value, we can create our own queries whose state is not tracked by the query store. For example, if we received a todo id as a url parameter, we could do something like the above.
+
 
 # API
 
