@@ -30,37 +30,33 @@ import createDB from "react-use-database";
 
 const TodoSchema = new schema.Entity("Todo");
 
-let [ DatabaseProvider, useDB ] = createDB(
-  [TodoSchema],
-  {},
-  {
-    // Seed the database
-    defaultValues: {
-      Todo: {
-        1: {
-          id: 1,
-          text: 'Buy cheese'
-        }
+let [DatabaseProvider, useDB] = createDB([TodoSchema], {
+  // Seed the database
+  defaultEntities: {
+    Todo: {
+      1: {
+        id: 1,
+        text: "Buy cheese"
       }
     }
   }
-);
+});
 
 const queries = {
-  getTodoById: (id) => {
+  getTodoById: id => {
     return {
       schema: TodoSchema,
       value: id
-    }
+    };
   }
-}
+};
 
-const App = (props) => {
+const App = props => {
   let db = useDB();
-  let queryToGetTodoWithIdOne = queries.getTodoById(1)
-  let todo = db.executeQuery(queryToGetTodoWithIdOne)
-  return <span>{todo.text}</span>
-}
+  let queryToGetTodoWithIdOne = queries.getTodoById(1);
+  let todo = db.executeQuery(queryToGetTodoWithIdOne);
+  return <span>{todo.text}</span>;
+};
 
 ReactDOM.render(
   <DatabaseProvider>
@@ -68,7 +64,6 @@ ReactDOM.render(
   </DatabaseProvider>,
   document.getElementById("root")
 );
-
 ```
 
 ## Complex Usage
