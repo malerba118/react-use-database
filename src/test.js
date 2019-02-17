@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { mount } from 'enzyme'
 import { initDB, getAppData, users, models } from './testHelpers'
+import createDB from '../'
 
 const timeout = (n) => {
   return new Promise((resolve) => {
@@ -8,6 +9,11 @@ const timeout = (n) => {
   })
 }
 
+class JSONSet extends Set {
+    toJSON () {
+        return [...this]
+    }
+}
 
 describe('useDB', () => {
 
@@ -62,6 +68,34 @@ describe('useDB', () => {
     )
     let data = getAppData(wrapper)
     expect(data).toEqual(users[0]);
+  })
+
+  it('default entities filters out bad keys', async () => {
+    let [DatabaseProvider, useDB] = initDB({
+      defaultEntities: {
+        User: {
+          1: users[0]
+        },
+        Comment: {
+          5: {
+            value: 'should be filtered out'
+          }
+        }
+      }
+    })
+
+    const App = (props) => {
+      let db = useDB()
+      return <div id="data">{JSON.stringify(Object.keys(db.entities))}</div>
+    }
+
+    let wrapper = mount(
+      <DatabaseProvider>
+        <App/>
+      </DatabaseProvider>
+    )
+    let data = getAppData(wrapper)
+    expect(data).toEqual(['Post', 'User']);
   })
 
   it('stored query defaultValue works', async () => {
@@ -232,4 +266,201 @@ describe('useDB', () => {
     expect(data.email).toEqual(users[0].email);
   })
 
+  it('mergeEntities filters out bad keys', async () => {
+    let [DatabaseProvider, useDB] = initDB({
+      userByIdDefaultValue: 0
+    })
+
+    const App = (props) => {
+      let db = useDB()
+      useEffect(() => {
+        db.mergeEntities({
+          Comment: {
+            5: {
+              value: 'should be filtered out'
+            }
+          }
+        })
+      }, [])
+      return <div id="data">{JSON.stringify(db.entities)}</div>
+    }
+
+    let wrapper = mount(
+      <DatabaseProvider>
+        <App/>
+      </DatabaseProvider>
+    )
+    let data = getAppData(wrapper)
+    expect(Object.keys(data)).toEqual(['Post', 'User']);
+    await timeout(0)
+    wrapper.update()
+    data = getAppData(wrapper)
+    console.log(JSON.stringify(data))
+    expect(Object.keys(data)).toEqual(['Post', 'User']);
+  })
+
+  it('mergeEntities arrays should be replaced', async () => {
+    let [DatabaseProvider, useDB] = initDB({
+      defaultEntities: {
+        User: {
+          1: {
+            ...users[0],
+            someArray: ['foo', 'bar', 'baz']
+          }
+        }
+      },
+    })
+
+    const App = (props) => {
+      let db = useDB()
+      useEffect(() => {
+        db.mergeEntities({
+          User: {
+            1: {
+              ...users[0],
+              someArray: ['baz']
+            }
+          }
+        })
+      }, [])
+      return <div id="data">{JSON.stringify(db.entities.User[1].someArray)}</div>
+    }
+
+    let wrapper = mount(
+      <DatabaseProvider>
+        <App/>
+      </DatabaseProvider>
+    )
+    let data = getAppData(wrapper)
+    expect(data).toEqual(['foo', 'bar', 'baz']);
+    await timeout(0)
+    wrapper.update()
+    data = getAppData(wrapper)
+    expect(data).toEqual(['baz']);
+  })
+
+  it('mergeEntities sets should be replaced', async () => {
+    let [DatabaseProvider, useDB] = initDB({
+      defaultEntities: {
+        User: {
+          1: {
+            ...users[0],
+            someSet: new JSONSet(['foo', 'bar'])
+          }
+        }
+      },
+    })
+
+    const App = (props) => {
+      let db = useDB()
+      useEffect(() => {
+        db.mergeEntities({
+          User: {
+            1: {
+              ...users[0],
+              someSet: new JSONSet(['bar'])
+            }
+          }
+        })
+      }, [])
+      return <div id="data">{JSON.stringify(db.entities.User[1].someSet)}</div>
+    }
+
+    let wrapper = mount(
+      <DatabaseProvider>
+        <App/>
+      </DatabaseProvider>
+    )
+    let data = getAppData(wrapper)
+    expect(data).toEqual(['foo', 'bar']);
+    await timeout(0)
+    wrapper.update()
+    data = getAppData(wrapper)
+    expect(data).toEqual(['bar']);
+  })
+
+  it('mergeEntities customizer should override default', async () => {
+    let [DatabaseProvider, useDB] = initDB({
+      defaultEntities: {
+        User: {
+          1: {
+            ...users[0],
+            someArray: ['foo', 'bar', 'baz']
+          }
+        }
+      },
+    })
+
+    const App = (props) => {
+      let db = useDB()
+      useEffect(() => {
+        db.mergeEntities(
+          {
+            User: {
+              1: {
+                ...users[0],
+                someArray: ['baz']
+              }
+            }
+          },
+          {
+            customizer: () => {}
+          }
+        )
+      }, [])
+      return <div id="data">{JSON.stringify(db.entities.User[1].someArray)}</div>
+    }
+
+    let wrapper = mount(
+      <DatabaseProvider>
+        <App/>
+      </DatabaseProvider>
+    )
+    let data = getAppData(wrapper)
+    expect(data).toEqual(['foo', 'bar', 'baz']);
+    await timeout(0)
+    wrapper.update()
+    data = getAppData(wrapper)
+    expect(data).toEqual(['baz', 'bar', 'baz']);
+  })
+
+  it('mergeEntities accepts function as first arg', async () => {
+    let [DatabaseProvider, useDB] = initDB({
+      defaultEntities: {
+        User: {
+          1: {
+            ...users[0],
+            someArray: ['foo']
+          }
+        }
+      },
+    })
+
+    const App = (props) => {
+      let db = useDB()
+      useEffect(() => {
+        db.mergeEntities((prevEntities) => ({
+          User: {
+            1: {
+              ...users[0],
+              someArray: [...prevEntities.User[1].someArray, 'bar']
+            }
+          }
+        }))
+      }, [])
+      return <div id="data">{JSON.stringify(db.entities.User[1].someArray)}</div>
+    }
+
+    let wrapper = mount(
+      <DatabaseProvider>
+        <App/>
+      </DatabaseProvider>
+    )
+    let data = getAppData(wrapper)
+    expect(data).toEqual(['foo']);
+    await timeout(0)
+    wrapper.update()
+    data = getAppData(wrapper)
+    expect(data).toEqual(['foo', 'bar']);
+  })
 })

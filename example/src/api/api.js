@@ -26,7 +26,7 @@ const fakeDatabase = {
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const fetchTodos = filter =>
-  delay(500).then(() => {
+  delay(1000).then(() => {
     switch (filter) {
       case 'all':
         return fakeDatabase.todos;
@@ -45,7 +45,7 @@ const fetchTodo = id =>
   });
 
 const addTodo = text =>
-  delay(500).then(() => {
+  delay(200).then(() => {
     const todo = {
       id: counter++,
       text,
@@ -56,7 +56,7 @@ const addTodo = text =>
   });
 
 const updateTodo = (id, {text, completed}) =>
-  delay(500).then(() => {
+  delay(200).then(() => {
     const todo = fakeDatabase.todos.find(t => t.id === id);
     todo.text = text === undefined ? todo.text : text;
     todo.completed = completed === undefined ? todo.completed : completed;
@@ -64,7 +64,7 @@ const updateTodo = (id, {text, completed}) =>
   });
 
 const deleteTodo = (id) =>
-  delay(500).then(() => {
+  delay(200).then(() => {
     let deletedTodo = fakeDatabase.todos.find(t => t.id === id);
     fakeDatabase.todos = fakeDatabase.todos.filter(t => t.id !== id);
     return deletedTodo;

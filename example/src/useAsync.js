@@ -26,7 +26,6 @@ const useAsync = fn => {
           fulfilled: true,
           result: result
         }));
-        return result;
       } catch (e) {
         setState(prevState => ({
           ...prevState,
@@ -34,7 +33,6 @@ const useAsync = fn => {
           rejected: true,
           result: e
         }));
-        throw e;
       }
     }
   ];

@@ -4,6 +4,7 @@ import mergeWith from "lodash/mergeWith";
 import cloneDeep from "lodash/cloneDeep";
 import isArray from "lodash/isArray";
 import isSet from "lodash/isSet";
+import pick from "lodash/pick";
 import { createGlobalState } from "react-hooks-global-state";
 
 const createDB = (
@@ -14,6 +15,7 @@ const createDB = (
   } = {}
 ) => {
   entitySchemas = Object.values(entitySchemas);
+  const entitySchemaNames = entitySchemas.map(s => s.key)
 
   const getSchemaByName = name => {
     return entitySchemas.filter(s => s.key === name)[0] || null;
@@ -23,7 +25,7 @@ const createDB = (
   entitySchemas.forEach(schema => {
     initialEntitiesState[schema.key] = {};
   });
-  initialEntitiesState = { ...initialEntitiesState, ...defaultEntities };
+  initialEntitiesState = { ...initialEntitiesState, ...pick(defaultEntities, entitySchemaNames) };
 
   let initialStoredQueriesState = {};
   Object.keys(storedQueryDefinitions).forEach(queryName => {
@@ -57,11 +59,12 @@ const createDB = (
     };
 
     return {
-      mergeEntities: (nextEntities, customizer) => {
+      mergeEntities: (nextEntities, { customizer } = {}) => {
         setEntities(prevEntities => {
           if ((typeof nextEntities) === 'function') {
             nextEntities = nextEntities(prevEntities)
           }
+          nextEntities = pick(nextEntities, entitySchemaNames)
           let nextState = mergeWith(
             {},
             prevEntities,

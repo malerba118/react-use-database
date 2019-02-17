@@ -10,6 +10,7 @@ import TodoDetail from './TodoDetail';
 import brace from 'brace';
 import AceEditor from 'react-ace';
 import ContainerDimensions from 'react-container-dimensions';
+import useAsync from './useAsync';
 import { useDB, useNormalizedApi } from './db'
 
 import 'brace/mode/json';
@@ -46,8 +47,10 @@ function App(props) {
   let normalizedApi = useNormalizedApi()
   let db = useDB();
 
+  let [fetchTodosRequest, fetchTodos] = useAsync(normalizedApi.fetchTodos)
+
   useEffect(() => {
-    normalizedApi.fetchTodos(filter)
+    fetchTodos(filter)
   }, [filter])
 
   let todos = db.executeStoredQuery(filterQueries[filter]);
@@ -68,6 +71,7 @@ function App(props) {
       </AppBar>
       <Sidebar
         todos={todos}
+        fetchTodosRequest={fetchTodosRequest}
         filter={filter}
         onFilterChange={setFilter}
         selectedTodo={selectedTodoId}
@@ -75,7 +79,7 @@ function App(props) {
       />
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        <div style={{height: '30%'}}>
+        <div style={{height: 170}}>
           <TodoDetail id={selectedTodoId}/>
         </div>
         <div style={{height: '70%', display: 'flex', justifyContent: 'space-between'}}>
