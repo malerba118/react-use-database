@@ -132,7 +132,7 @@ Because a query is just a schema and value, we can create our own queries whose 
     - [entities](#entities)
     - [storedQueries](#storedQueries)
 
-## `createDB(entitySchemas, options)`
+### `createDB(entitySchemas, options)`
 
 Creates DatabaseProvider and useDB hook.
 
@@ -175,7 +175,7 @@ let [ DatabaseProvider, useDB ] = createDB(
 );
 ```
 
-## `DatabaseProvider`
+### `DatabaseProvider`
 
 React context provider that enables react-use-database to have global state.
 
@@ -190,7 +190,7 @@ ReactDOM.render(
 );
 ```
 
-## `useDB()`
+### `useDB()`
 
 React database hook that allows you to query and update the database
 
@@ -199,7 +199,7 @@ React database hook that allows you to query and update the database
 ```js
 const useNormalizedApi = () => {
   let db = useDB();
-  
+
   return {
     ...
     addTodo: async (text) => {
@@ -209,25 +209,25 @@ const useNormalizedApi = () => {
         apiSchemas.addTodoResponseSchema
       );
       db.mergeEntities(entities); // Merge new todo data into database
-      db.updateStoredQuery('ALL_TODOS', (prevArray) => [...prevArray, todo.id]); 
+      db.updateStoredQuery('ALL_TODOS', (prevArray) => [...prevArray, todo.id]);
     },
     ...
   };
 };
-  
+
 const TodosComponent = (props) => {
   let db = useDB();
-  
+
   let allTodosQuery = db.getStoredQuery('ALL_TODOS');
   let todos = db.executeQuery(allTodosQuery);
-  
+
   return (
     <JSON data={todos} />
   )
 }
 ```
 
-## `mergeEntities(entitiesPatch, options)`
+### `mergeEntities(entitiesPatch, options)`
 
 Deep merges an entities patch onto the current entities object to produce next entities state.
 
@@ -240,9 +240,9 @@ Deep merges an entities patch onto the current entities object to produce next e
 ```js
 const TodosComponent = (props) => {
   let db = useDB();
-  
+
   let todo = db.executeQuery({schema: TodoSchema, value: 1});
-  
+
   useEffect(() => {
     db.mergeEntities({
       Todo: {
@@ -254,14 +254,14 @@ const TodosComponent = (props) => {
       }
     })
   }, [])
-  
+
   return (
     <JSON data={todo} />
   )
 }
 ```
 
-## `executeQuery(query)`
+### `executeQuery(query)`
 
 Executes a query against the database (db.entities).
 
@@ -272,7 +272,7 @@ Executes a query against the database (db.entities).
 ```js
 const TodosComponent = (props) => {
   let db = useDB();
-  
+
   let todos = db.executeQuery({schema: [TodoSchema], value: [1, 2, 3]});
 
   return (
@@ -281,11 +281,11 @@ const TodosComponent = (props) => {
 }
 ```
 
-## `getStoredQuery(storedQueryName)`
+### `getStoredQuery(storedQueryName)`
 
 Gets the current query state for the query name provided.
 
-* `query`: **required** object with shape `{schema: normalizr.schema, value: object}`
+* `storedQueryName`: **required** query name from keys defined in storedQueryDefinitions
 
 ### Usage
 
@@ -306,7 +306,7 @@ let [ DatabaseProvider, useDB ] = createDB(
 
 const TodosComponent = (props) => {
   let db = useDB();
-  
+
   let allTodosQuery = db.getStoredQuery('ALL_TODOS');
   console.log(allTodosQuery) // -> {schema: [TodoSchema], value: [1, 2, 3]}
   let todos = db.executeQuery(allTodosQuery);
@@ -317,7 +317,7 @@ const TodosComponent = (props) => {
 }
 ```
 
-## `executeStoredQuery(storedQueryName)`
+### `executeStoredQuery(storedQueryName)`
 
 An alias for `db.executeQuery(db.getStoredQuery(storedQueryName))`.
 
@@ -326,20 +326,20 @@ An alias for `db.executeQuery(db.getStoredQuery(storedQueryName))`.
 ```js
 const TodosComponent = (props) => {
   let db = useDB();
-  
+
   let todos = db.executeStoredQuery('ALL_TODOS');
-  
+
   return (
     <JSON data={todos} />
   )
 }
 ```
 
-## `entities`
+### `entities`
 
 The root data object from the entity store. Useful to listen to state changes.
 Could be used to persist parts of state to local storage or to implement undo/redo features.
-Entities save to local storage could be used to hydrate the store via createDB's defaultEntities option.
+Entities saved to local storage could be used to hydrate the store via createDB's defaultEntities option.
 
 ### Usage
 
@@ -353,14 +353,14 @@ let [ DatabaseProvider, useDB ] = createDB(
 
 const useEntityListener = () => {
   let db = useDB();
-  
+
   useEffect(() => {
     LocalStorageClient.saveState('entities', db.entities)
   }, [db.entities])
 }
 ```
 
-## `storedQueries`
+### `storedQueries`
 
 The root data object from the query store. Useful to listen to state changes.
 Could be used to persist parts of state to local storage or to implement undo/redo features.
@@ -370,7 +370,7 @@ Could be used to persist parts of state to local storage or to implement undo/re
 ```js
 const useStoredQueryListener = () => {
   let db = useDB();
-  
+
   useEffect(() => {
     //do something
   }, [db.storedQueries])
@@ -380,5 +380,3 @@ const useStoredQueryListener = () => {
 ## License
 
 MIT © [malerba118](https://github.com/malerba118)
-
-

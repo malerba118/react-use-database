@@ -19,7 +19,10 @@ const drawerWidth = 360;
 const styles = theme => ({
   drawer: {
     width: drawerWidth,
-    flexShrink: 0,
+    minWidth: drawerWidth,
+    flex: 1,
+    height: '100vh',
+    borderRight: '1px solid rgba(0, 0, 0, 0.12)'
   },
   drawerPaper: {
     width: drawerWidth,
@@ -42,7 +45,7 @@ const styles = theme => ({
   addTodoButton: {
     position: 'absolute',
     width: 64,
-    height: 64,
+    height: '100%',
     right: 0,
     display: 'flex',
     justifyContent: 'center',
@@ -64,14 +67,7 @@ function Sidebar(props) {
   const closeAddTodoDialog = () => setAddTodoDialogOpen(false)
 
   return (
-    <Drawer
-      className={classes.drawer}
-      variant="permanent"
-      classes={{
-        paper: classes.drawerPaper,
-      }}
-      anchor="left"
-    >
+    <div className={classes.drawer}>
       <div className={classes.toolbar}>
         <Tabs
           value={tabs.indexOf(props.filter)}
@@ -121,7 +117,7 @@ function Sidebar(props) {
           ))}
         </List>
       )}
-    </Drawer>
+    </div>
   );
 }
 

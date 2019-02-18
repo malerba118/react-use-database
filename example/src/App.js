@@ -21,17 +21,45 @@ const drawerWidth = 360;
 const styles = theme => ({
   root: {
     display: 'flex',
+    flexWrap: 'wrap'
   },
   appBar: {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: drawerWidth,
+
   },
   toolbar: theme.mixins.toolbar,
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing.unit * 3,
-    minWidth: 550
+  contentAndToolbar: {
+    flex: 3,
+    minWidth: 320,
+    boxSizing: 'border-box'
   },
+  content: {
+    padding: theme.spacing.unit * 3,
+    height: 'calc(100vh - 64px)',
+    boxSizing: 'border-box',
+  },
+  storeInspectors: {
+    height: '70%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    overflowX: 'auto'
+  },
+  storeInspector: {
+    flex: 1,
+    margin: 8,
+    boxSizing: 'border-box'
+  },
+  storeInspectorHeader: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    background: '#252620',
+    color: 'rgba(255, 255, 255, .8)',
+    height: 48
+  },
+  todoDetail: {
+    height: 170
+  }
 });
 
 const filterQueries = {
@@ -63,13 +91,6 @@ function App(props) {
 
   return (
     <div className={classes.root}>
-      <AppBar position="fixed" className={classes.appBar}>
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-            Todo App
-          </Typography>
-        </Toolbar>
-      </AppBar>
       <Sidebar
         todos={todos}
         fetchTodosRequest={fetchTodosRequest}
@@ -78,76 +99,64 @@ function App(props) {
         selectedTodo={selectedTodoId}
         onSelectedTodoChange={setSelectedTodoId}
       />
-      <main className={classes.content}>
-        <div className={classes.toolbar} />
-        <div style={{height: 170}}>
-          <TodoDetail id={selectedTodoId}/>
-        </div>
-        <div style={{height: '70%', display: 'flex', justifyContent: 'space-between'}}>
-          <div style={{flex: 1, margin: 8}}>
-          <ContainerDimensions>
-              { ({ height, width }) => (
-                  <React.Fragment>
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        background: '#252620',
-                        color: 'rgba(255, 255, 255, .8)',
-                        height: 48
-                      }}
-                    >
-                      Entity Store
-                    </div>
-                    <AceEditor
-                      value={JSON.stringify(db.entities, 2, 2)}
-                      mode="json"
-                      theme="monokai"
-                      width={width}
-                      height={320}
-                      readOnly
-                      name="entities-json"
-                      editorProps={{$blockScrolling: true}}
-                    />
-                  </React.Fragment>
-              ) }
-          </ContainerDimensions>
+      <div className={classes.contentAndToolbar}>
+        <AppBar position="relative" className={classes.appBar}>
+          <Toolbar>
+            <Typography variant="h6" color="inherit" noWrap>
+              Todo App
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <div className={classes.content}>
+          <div className={classes.todoDetail}>
+            <TodoDetail id={selectedTodoId}/>
           </div>
-          <div style={{flex: 1, margin: 8}}>
+          <div className={classes.storeInspectors}>
+            <div className={classes.storeInspector}>
             <ContainerDimensions>
                 { ({ height, width }) => (
-                  <React.Fragment>
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        background: '#252620',
-                        color: 'rgba(255, 255, 255, .8)',
-                        height: 48
-                      }}
-                    >
-                      Query Store
-                    </div>
-                    <AceEditor
-                      value={JSON.stringify(db.storedQueries, 2, 2)}
-                      mode="json"
-                      theme="monokai"
-                      width={width}
-                      height={320}
-                      readOnly
-                      name="stored-queries-json"
-                      editorProps={{$blockScrolling: true}}
-                    />
-                  </React.Fragment>
+                    <React.Fragment>
+                      <div className={classes.storeInspectorHeader}>
+                        Entity Store
+                      </div>
+                      <AceEditor
+                        value={JSON.stringify(db.entities, 2, 2)}
+                        mode="json"
+                        theme="monokai"
+                        width={width}
+                        height={320}
+                        readOnly
+                        name="entities-json"
+                        editorProps={{$blockScrolling: true}}
+                      />
+                    </React.Fragment>
                 ) }
             </ContainerDimensions>
+            </div>
+            <div className={classes.storeInspector}>
+              <ContainerDimensions>
+                  { ({ height, width }) => (
+                    <React.Fragment>
+                      <div className={classes.storeInspectorHeader}>
+                        Query Store
+                      </div>
+                      <AceEditor
+                        value={JSON.stringify(db.storedQueries, 2, 2)}
+                        mode="json"
+                        theme="monokai"
+                        width={width}
+                        height={320}
+                        readOnly
+                        name="stored-queries-json"
+                        editorProps={{$blockScrolling: true}}
+                      />
+                    </React.Fragment>
+                  ) }
+              </ContainerDimensions>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
