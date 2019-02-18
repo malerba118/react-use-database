@@ -2,9 +2,15 @@
 
 > relational data at its simplest
 
-react-use-database gives you an opinionated interface, efficient data flow, and concise global state management. It forces you to think about your client-side data in the context of a queryable database. It gives you two global data stores: an entity store and a query store. The entity store contains all of your model data. It’s just a giant json blob that is **the source of truth** for any **database entity** that you have defined via Normalizr’s notion of schemas (eg UserSchema, TodoSchema, CommentSchema, etc.). But, what good is a database without a way to pull data from it? That’s where the query store comes in. A query is comprised of a schema and a value. The query `{schema: UserSchema, value: 32}` would return you a user whose id is 32. The query `{schema: [UserSchema], value: [32]}` would return you a singleton array of the user whose id is 32. By tracking and updating your entities and queries in their respective stores, **every component can have access to the latest data with minimal code and minimal effort**. Note, [Normalizr](https://github.com/paularmstrong/normalizr) is a peer dependency of react-use-database, you should familiarize yourself with it.
+react-use-database gives you an opinionated interface, efficient data flow, and concise global state management. It forces you to think about your client-side data in the context of a queryable database. It gives you two global data stores: an **entity store** and a **query store**. 
 
-I used to implement relational state management with Redux/Normalizr. It worked well, but there was too much boilerplate and trying to onboard a new-hire to the idea was incredibly daunting. Redux and Normalizr are an incredible pairing, Dan Abramov was really onto something with his creation of each (He’s even done an [Egghead tutorial series](https://egghead.io/courses/building-react-applications-with-idiomatic-redux)  in which he describes almost the exact design pattern I’ve implemented in this library). The problem with Redux is that it lacks opinionation and it can be overwhelmingly verbose. It’s vulnerable to anti-patterns and there’s nothing inherent to its API to enforce its proper use. When used improperly, redux can become more of a burden than an asset.
+
+The entity store contains all of your model data. It’s just a big json blob that is **the source of truth** for any **database entity** that you have defined via Normalizr’s notion of schemas (eg UserSchema, TodoSchema, CommentSchema, etc.).
+Note, [Normalizr](https://github.com/paularmstrong/normalizr) is a peer dependency of react-use-database, you should familiarize yourself with it.
+
+But, what good is a database without a way to pull data from it? That’s where the query store comes in. A query is comprised of a schema and a value. The query `{schema: UserSchema, value: 32}` would return you a user whose id is 32. The query `{schema: [UserSchema], value: [32, 33, 34]}` would return you an array of three users. By tracking and updating your entities and queries in their respective stores, **every component can have access to the latest data with almost no additional code**.
+
+I used to implement relational state management with Redux/Normalizr. It worked well, but there was too much boilerplate and trying to onboard a new-hire to the idea was daunting. Redux and Normalizr are an incredible pairing, Dan Abramov was really onto something with his creation of each (He’s even done an [Egghead tutorial series](https://egghead.io/courses/building-react-applications-with-idiomatic-redux)  in which he describes almost the exact design pattern I’ve implemented in this library). The problem with Redux is that it lacks opinionation and it can be overwhelmingly verbose. It’s vulnerable to anti-patterns and there’s nothing inherent to its API to enforce its proper use. When used improperly, redux can become more of a burden than an asset.
 
 
 
@@ -130,13 +136,13 @@ Because a query is just a schema and value, we can create our own queries whose 
     - [getStoredQuery](#getstoredquerystoredqueryname)
     - [executeStoredQuery](#executestoredquerystoredqueryname)
     - [entities](#entities)
-    - [storedQueries](#storedQueries)
+    - [storedQueries](#storedqueries)
 
 ### `createDB(entitySchemas, options)`
 
 Creates DatabaseProvider and useDB hook.
 
-* `entitySchemas`: **required** Array or object whose values are normalizr Entity schemas
+* `entitySchemas`: **required** Array or object whose values are [normalizr Entity schemas](https://github.com/paularmstrong/normalizr/blob/master/docs/api.md#entitykey-definition---options--)
 * `options`: **optional** options
   - `storedQueryDefinitions`: Object whose keys are query names and whose values have form `{ schema, defaultValue }`
   - `defaultEntities` : An entities object to seed the database
@@ -229,7 +235,7 @@ const TodosComponent = (props) => {
 
 ### `mergeEntities(entitiesPatch, options)`
 
-Deep merges an entities patch onto the current entities object to produce next entities state.
+Immutably deep merges an entities patch on to the current entities object to produce next entities state.
 
 * `entitiesPatch`: **required** function or partial entities object. If function, one argument will be passed, the current entities. Under the hood, lodash's mergeWith is called to merge the entitiesPatch onto the current entities to produce the next enitities object.
 * `options`: **optional** options
@@ -320,6 +326,8 @@ const TodosComponent = (props) => {
 ### `executeStoredQuery(storedQueryName)`
 
 An alias for `db.executeQuery(db.getStoredQuery(storedQueryName))`.
+
+* `storedQueryName`: **required** query name from keys defined in storedQueryDefinitions
 
 ### Usage
 
