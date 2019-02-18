@@ -1,4 +1,4 @@
-import { createContext, createElement, useCallback, useContext, useState, useEffect } from 'react';
+import { createContext, createElement, useCallback, useState, useEffect, __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED } from 'react';
 import { denormalize } from 'normalizr';
 
 /**
@@ -1864,11 +1864,11 @@ var _baseKeysIn = baseKeysIn;
  * _.keysIn(new Foo);
  * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
  */
-function keysIn$1(object) {
+function keysIn(object) {
   return isArrayLike_1(object) ? _arrayLikeKeys(object, true) : _baseKeysIn(object);
 }
 
-var keysIn_1 = keysIn$1;
+var keysIn_1 = keysIn;
 
 /**
  * Converts `value` to a plain object flattening inherited enumerable string
@@ -2301,66 +2301,6 @@ var mergeWith = _createAssigner(function(object, source, srcIndex, customizer) {
 
 var mergeWith_1 = mergeWith;
 
-/**
- * A specialized version of `_.forEach` for arrays without support for
- * iteratee shorthands.
- *
- * @private
- * @param {Array} [array] The array to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns `array`.
- */
-
-/**
- * A specialized version of `_.filter` for arrays without support for
- * iteratee shorthands.
- *
- * @private
- * @param {Array} [array] The array to iterate over.
- * @param {Function} predicate The function invoked per iteration.
- * @returns {Array} Returns the new filtered array.
- */
-
-/**
- * This method returns a new empty array.
- *
- * @static
- * @memberOf _
- * @since 4.13.0
- * @category Util
- * @returns {Array} Returns the new empty array.
- * @example
- *
- * var arrays = _.times(2, _.stubArray);
- *
- * console.log(arrays);
- * // => [[], []]
- *
- * console.log(arrays[0] === arrays[1]);
- * // => false
- */
-
-/**
- * Appends the elements of `values` to `array`.
- *
- * @private
- * @param {Array} array The array to modify.
- * @param {Array} values The values to append.
- * @returns {Array} Returns `array`.
- */
-function arrayPush(array, values) {
-  var index = -1,
-      length = values.length,
-      offset = array.length;
-
-  while (++index < length) {
-    array[offset + index] = values[index];
-  }
-  return array;
-}
-
-var _arrayPush = arrayPush;
-
 /* Built-in method references that are verified to be native. */
 var DataView = _getNative(_root, 'DataView');
 
@@ -2432,19 +2372,8 @@ if ((_DataView && getTag(new _DataView(new ArrayBuffer(1))) != dataViewTag$1) ||
 
 var _getTag = getTag;
 
-/** Used for built-in method references. */
-
-/** Used to match `RegExp` flags from their coerced string values. */
-
-/** Used to convert symbols to primitives and strings. */
-var symbolProto = _Symbol ? _Symbol.prototype : undefined,
-    symbolValueOf = symbolProto ? symbolProto.valueOf : undefined;
-
-/* Node.js helper references. */
-var nodeIsMap = _nodeUtil && _nodeUtil.isMap;
-
 /** `Object#toString` result references. */
-var setTag$3 = '[object Set]';
+var setTag$2 = '[object Set]';
 
 /**
  * The base implementation of `_.isSet` without Node.js optimizations.
@@ -2454,7 +2383,7 @@ var setTag$3 = '[object Set]';
  * @returns {boolean} Returns `true` if `value` is a set, else `false`.
  */
 function baseIsSet(value) {
-  return isObjectLike_1(value) && _getTag(value) == setTag$3;
+  return isObjectLike_1(value) && _getTag(value) == setTag$2;
 }
 
 var _baseIsSet = baseIsSet;
@@ -2484,7 +2413,7 @@ var isSet = nodeIsSet ? _baseUnary(nodeIsSet) : _baseIsSet;
 var isSet_1 = isSet;
 
 /** `Object#toString` result references. */
-var symbolTag$2 = '[object Symbol]';
+var symbolTag = '[object Symbol]';
 
 /**
  * Checks if `value` is classified as a `Symbol` primitive or object.
@@ -2505,7 +2434,7 @@ var symbolTag$2 = '[object Symbol]';
  */
 function isSymbol(value) {
   return typeof value == 'symbol' ||
-    (isObjectLike_1(value) && _baseGetTag(value) == symbolTag$2);
+    (isObjectLike_1(value) && _baseGetTag(value) == symbolTag);
 }
 
 var isSymbol_1 = isSymbol;
@@ -2686,8 +2615,8 @@ var _arrayMap = arrayMap;
 var INFINITY = 1 / 0;
 
 /** Used to convert symbols to primitives and strings. */
-var symbolProto$1 = _Symbol ? _Symbol.prototype : undefined,
-    symbolToString = symbolProto$1 ? symbolProto$1.toString : undefined;
+var symbolProto = _Symbol ? _Symbol.prototype : undefined,
+    symbolToString = symbolProto ? symbolProto.toString : undefined;
 
 /**
  * The base implementation of `_.toString` which doesn't convert nullish
@@ -2966,6 +2895,27 @@ function basePick(object, paths) {
 
 var _basePick = basePick;
 
+/**
+ * Appends the elements of `values` to `array`.
+ *
+ * @private
+ * @param {Array} array The array to modify.
+ * @param {Array} values The values to append.
+ * @returns {Array} Returns `array`.
+ */
+function arrayPush(array, values) {
+  var index = -1,
+      length = values.length,
+      offset = array.length;
+
+  while (++index < length) {
+    array[offset + index] = values[index];
+  }
+  return array;
+}
+
+var _arrayPush = arrayPush;
+
 /** Built-in value references. */
 var spreadableSymbol = _Symbol ? _Symbol.isConcatSpreadable : undefined;
 
@@ -3079,11 +3029,22 @@ var pick_1 = pick;
 // utility functions
 
 const isFunction$1 = fn => (typeof fn === 'function');
+
 const updateValue = (oldValue, newValue) => {
   if (isFunction$1(newValue)) {
     return newValue(oldValue);
   }
   return newValue;
+};
+
+// ref: https://github.com/dai-shi/react-hooks-global-state/issues/5
+const useUnstableContextWithoutWarning = (Context, observedBits) => {
+  const { ReactCurrentDispatcher } = __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+  const dispatcher = ReactCurrentDispatcher.current;
+  if (!dispatcher) {
+    throw new Error('Hooks can only be called inside the body of a function component. (https://fb.me/react-invalid-hook-call)');
+  }
+  return dispatcher.useContext(Context, observedBits);
 };
 
 // core functions
@@ -3101,7 +3062,7 @@ const createGlobalStateCommon = (initialState) => {
     return bits;
   };
 
-  const context = createContext(initialState, calculateChangedBits);
+  const Context = createContext(initialState, calculateChangedBits);
 
   const GlobalStateProvider = ({ children }) => {
     const [state, setState] = useState(initialState);
@@ -3118,7 +3079,7 @@ const createGlobalStateCommon = (initialState) => {
       };
       return cleanup;
     }, []);
-    return createElement(context.Provider, { value: state }, children);
+    return createElement(Context.Provider, { value: state }, children);
   };
 
   const setGlobalState = (name, update) => {
@@ -3131,7 +3092,8 @@ const createGlobalStateCommon = (initialState) => {
 
   const useGlobalState = (name) => {
     const index = keys.indexOf(name);
-    const state = useContext(context, 1 << index);
+    const observedBits = 1 << index;
+    const state = useUnstableContextWithoutWarning(Context, observedBits);
     const updater = useCallback(u => setGlobalState(name, u), [name]);
     return [state[name], updater];
   };

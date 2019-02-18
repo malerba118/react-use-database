@@ -36,13 +36,13 @@
   },
   "dependencies": {
     "lodash": "4.17.11",
-    "react-hooks-global-state": "^0.6.0"
+    "react-hooks-global-state": "^0.7.0"
   },
   "peerDependencies": {
     "prop-types": "^15.5.4",
-    "react": ">= 16.8.0-alpha.0",
-    "react-dom": ">= 16.8.0-alpha.0",
-    "normalizr": ">= 3.0.1"
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
+    "normalizr": "^3.0.1"
   },
   "devDependencies": {
     "@babel/plugin-proposal-object-rest-spread": "^7.3.2",

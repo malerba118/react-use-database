@@ -95,7 +95,7 @@ function Sidebar(props) {
       </div>
       <Divider />
       {props.fetchTodosRequest.pending && (
-        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%'}}>
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '30%'}}>
           <HashLoader size={30} />
         </div>
       )}
