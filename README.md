@@ -236,7 +236,7 @@ const TodosComponent = (props) => {
 
 ### `mergeEntities(entitiesPatch, options)`
 
-Immutably deep merges an entities patch on to the current entities object to produce next entities state.
+Immutably deep merges an entities patch on to the current entities object to produce next entities state. Triggers re-render for components consuming useDB.
 
 * `entitiesPatch`: **required** function or partial entities object. If function, one argument will be passed, the current entities. Under the hood, lodash's mergeWith is called to merge the entitiesPatch onto the current entities to produce the next enitities object.
 * `options`: **optional** options
