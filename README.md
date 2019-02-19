@@ -134,6 +134,7 @@ Because a query is just a schema and value, we can create our own queries whose 
     - [mergeEntities](#mergeentitiesentitiespatch-options)
     - [executeQuery](#executequeryquery)
     - [getStoredQuery](#getstoredquerystoredqueryname)
+    - [updateStoredQuery](#updatestoredquerystoredqueryname-nextvalue)
     - [executeStoredQuery](#executestoredquerystoredqueryname)
     - [entities](#entities)
     - [storedQueries](#storedqueries)
@@ -229,8 +230,8 @@ const TodosComponent = (props) => {
 
   return (
     <JSON data={todos} />
-  )
-}
+  );
+};
 ```
 
 ### `mergeEntities(entitiesPatch, options)`
@@ -258,13 +259,13 @@ const TodosComponent = (props) => {
           completed: false
         }
       }
-    })
-  }, [])
+    });
+  }, []);
 
   return (
     <JSON data={todo} />
-  )
-}
+  );
+};
 ```
 
 ### `executeQuery(query)`
@@ -283,8 +284,8 @@ const TodosComponent = (props) => {
 
   return (
     <JSON data={todos} />
-  )
-}
+  );
+};
 ```
 
 ### `getStoredQuery(storedQueryName)`
@@ -296,7 +297,7 @@ Gets the current query state for the query name provided.
 ### Usage
 
 ```js
-const models = [TodoSchema]
+const models = [TodoSchema];
 
 let [ DatabaseProvider, useDB ] = createDB(
   models,
@@ -314,13 +315,38 @@ const TodosComponent = (props) => {
   let db = useDB();
 
   let allTodosQuery = db.getStoredQuery('ALL_TODOS');
-  console.log(allTodosQuery) // -> {schema: [TodoSchema], value: [1, 2, 3]}
+  console.log(allTodosQuery); // -> {schema: [TodoSchema], value: [1, 2, 3]}
   let todos = db.executeQuery(allTodosQuery);
 
   return (
     <JSON data={todos} />
-  )
-}
+  );
+};
+```
+
+### `updateStoredQuery(storedQueryName, nextValue)`
+
+Updates the value of the query with name equal to storedQueryName and triggers re-render for components consuming useDB.
+
+* `storedQueryName`: **required** query name from keys defined in storedQueryDefinitions
+* `nextValue`: **required** The next value of the stored query or a function that takes in the current value of the stored query and returns the next value
+
+### Usage
+
+```js
+const TodosComponent = (props) => {
+  let db = useDB();
+
+  let todo = db.executeStoredQuery('ALL_TODOS');
+
+  useEffect(() => {
+    db.updateStoredQuery('ALL_TODOS', (prevArray) => [...prevArray, 32]);
+  }, []);
+
+  return (
+    <JSON data={todo} />
+  );
+};
 ```
 
 ### `executeStoredQuery(storedQueryName)`
@@ -339,8 +365,8 @@ const TodosComponent = (props) => {
 
   return (
     <JSON data={todos} />
-  )
-}
+  );
+};
 ```
 
 ### `entities`
@@ -364,8 +390,8 @@ const useEntityListener = () => {
 
   useEffect(() => {
     LocalStorageClient.saveState('entities', db.entities)
-  }, [db.entities])
-}
+  }, [db.entities]);
+};
 ```
 
 ### `storedQueries`
@@ -381,8 +407,8 @@ const useStoredQueryListener = () => {
 
   useEffect(() => {
     //do something
-  }, [db.storedQueries])
-}
+  }, [db.storedQueries]);
+};
 ```
 
 ## License
