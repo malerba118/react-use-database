@@ -12,6 +12,7 @@ But, what good is a database without a way to pull data from it? That’s where 
 
 I used to implement relational state management with Redux/Normalizr. It worked well, but there was too much boilerplate and trying to onboard a new-hire to the idea was daunting. Redux and Normalizr are an incredible pairing, Dan Abramov was really onto something with his creation of each (He’s even done an [Egghead tutorial series](https://egghead.io/courses/building-react-applications-with-idiomatic-redux)  in which he describes almost the exact design pattern I’ve implemented in this library). The problem with Redux is that it lacks opinionation and it can be overwhelmingly verbose. It’s vulnerable to anti-patterns and there’s nothing inherent to its API to enforce its proper use. When used improperly, redux can become more of a burden than an asset.
 
+For a more detailed introduction to react-use-database, see this [medium article](https://medium.com/free-code-camp/introducing-react-use-database-client-side-relational-data-just-got-easier-d272c9465bf0)
 
 
 [![NPM](https://img.shields.io/npm/v/react-use-database.svg)](https://www.npmjs.com/package/react-use-database) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
