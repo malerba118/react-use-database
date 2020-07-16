@@ -35,7 +35,7 @@
     "deploy": "gh-pages -d example/build"
   },
   "dependencies": {
-    "lodash": "4.17.11",
+    "lodash": "4.17.19",
     "react-hooks-global-state": "^0.7.0"
   },
   "peerDependencies": {
