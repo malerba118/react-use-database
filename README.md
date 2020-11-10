@@ -2,6 +2,8 @@
 
 > relational data at its simplest
 
+:warning::warning::warning: This library is no longer maintained, please consider [react-query](https://github.com/tannerlinsley/react-query) and [apollo-graphql](https://www.apollographql.com/docs/react/) as more robust solutions :warning::warning::warning:
+
 react-use-database gives you an opinionated interface, efficient data flow, and concise global state management. It forces you to think about your client-side data in the context of a queryable database. It gives you two global data stores: an **entity store** and a **query store**. 
 
 
