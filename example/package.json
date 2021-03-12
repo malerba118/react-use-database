@@ -43,7 +43,7 @@
     "react": "16.8.0-alpha.0",
     "react-ace": "^6.4.0",
     "react-container-dimensions": "^1.4.1",
-    "react-dev-utils": "^5.0.2",
+    "react-dev-utils": "^11.0.4",
     "react-dom": "16.8.0-alpha.0",
     "react-spinners": "^0.5.1",
     "react-use-database": "file:..",
